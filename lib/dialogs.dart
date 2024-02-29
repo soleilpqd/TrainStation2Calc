@@ -9,6 +9,7 @@ Future<void> inputNumberDialogBuilder(BuildContext context, String title, String
       return AlertDialog(
         title: Text(title),
         content: TextField(
+            autofocus: true,
             controller: controller,
             decoration: const InputDecoration(labelText: "Input a number"),
             keyboardType: TextInputType.number,

@@ -1,0 +1,1242 @@
+{
+    "resources": [
+        {
+            "name": "iron ore",
+            "time": 30,
+            "icon": "Icon_Iron_ore.png",
+            "level": 1
+        },
+        {
+            "name": "coal",
+            "time": 30,
+            "icon": "Icon_coal.png",
+            "level": 1
+        },
+        {
+            "name": "wood",
+            "time": 300,
+            "icon": "Icon_wood.png",
+            "level": 10
+        },
+        {
+            "name": "copper ore",
+            "time": 300,
+            "icon": "Icon_copper_ore.png",
+            "level": 10
+        },
+        {
+            "name": "crude oil",
+            "time": 300,
+            "icon": "Icon_crude_oil.png",
+            "level": 40
+        },
+        {
+            "name": "grain",
+            "time": 300,
+            "icon": "Icon_grain.png",
+            "level": 100
+        },
+        {
+            "name": "livestock",
+            "time": 300,
+            "icon": "Icon_livestock.png",
+            "level": 100
+        },
+        {
+            "name": "rock salt",
+            "time": 300,
+            "icon": "Icon_rock_salt.png",
+            "level": 200
+        },
+        {
+            "name": "limestone",
+            "time": 300,
+            "icon": null,
+            "level": 300
+        },
+        {
+            "name": "sand",
+            "time": 300,
+            "icon": null,
+            "level": 400
+        },
+        {
+            "name": "cotton",
+            "time": 300,
+            "icon": null,
+            "level": 500
+        },
+        {
+            "name": "nickel ore",
+            "time": 300,
+            "icon": null,
+            "level": 600
+        },
+        {
+            "name": "tungsten ore",
+            "time": 300,
+            "icon": null,
+            "level": 700
+        },
+        {
+            "name": "gypsum",
+            "time": 300,
+            "icon": null,
+            "level": 800
+        },
+        {
+            "name": "bauxite",
+            "time": 0,
+            "icon": "Icon_bauxite.png",
+            "level": 900
+        },
+        {
+            "name": "lithium brine",
+            "time": 0,
+            "icon": null,
+            "level": 1000
+        },
+        {
+            "name": "titanium ore",
+            "time": 0,
+            "icon": null,
+            "level": 1100
+        }
+    ],
+    "products": [
+        {
+            "name": "steel",
+            "produceTime": 300,
+            "icon": "Icon_steel.png",
+            "level": 4,
+            "amount": 40,
+            "mineTime": 180
+        },
+        {
+            "name": "copper",
+            "produceTime": 1800,
+            "icon": "Icon_copper.png",
+            "level": 11,
+            "amount": 80,
+            "mineTime": null
+        },
+        {
+            "name": "glass",
+            "produceTime": 900,
+            "icon": "Icon_glass.png",
+            "level": 402,
+            "amount": 120,
+            "mineTime": null
+        },
+        {
+            "name": "nickel",
+            "produceTime": 1200,
+            "icon": "Icon_nickel.png",
+            "level": 602,
+            "amount": 200,
+            "mineTime": null
+        },
+        {
+            "name": "tungsten",
+            "produceTime": 600,
+            "icon": "Icon_tungsten.png",
+            "level": 702,
+            "amount": 80,
+            "mineTime": 180
+        },
+        {
+            "name": "aluminium",
+            "produceTime": null,
+            "icon": "Icon_aluminium.png",
+            "level": 902,
+            "amount": 160,
+            "mineTime": 180
+        },
+        {
+            "name": "titanium",
+            "produceTime": null,
+            "icon": null,
+            "level": 1105,
+            "amount": 100,
+            "mineTime": null
+        },
+        {
+            "name": "iron powder",
+            "produceTime": 180,
+            "icon": "Icon_iron_powder.png",
+            "level": 5,
+            "amount": 30,
+            "mineTime": null
+        },
+        {
+            "name": "nails",
+            "produceTime": 600,
+            "icon": "Icon_nails.png",
+            "level": 7,
+            "amount": 40,
+            "mineTime": null
+        },
+        {
+            "name": "saw blade",
+            "produceTime": 1200,
+            "icon": "Icon_saw_blade.png",
+            "level": 9,
+            "amount": 70,
+            "mineTime": null
+        },
+        {
+            "name": "copper wire",
+            "produceTime": 1500,
+            "icon": "Icon_copper_wire.png",
+            "level": 16,
+            "amount": 110,
+            "mineTime": null
+        },
+        {
+            "name": "sheet steel",
+            "produceTime": 1800,
+            "icon": "Icon_sheet_steel.png",
+            "level": 80,
+            "amount": 70,
+            "mineTime": null
+        },
+        {
+            "name": "stainless steel",
+            "produceTime": 1800,
+            "icon": "Icon_stainless_steel.png",
+            "level": 630,
+            "amount": 400,
+            "mineTime": null
+        },
+        {
+            "name": "steel wire",
+            "produceTime": 900,
+            "icon": "Icon_steel_wire.png",
+            "level": 730,
+            "amount": 120,
+            "mineTime": null
+        },
+        {
+            "name": "timber",
+            "produceTime": 900,
+            "icon": "Icon_timber.png",
+            "level": 14,
+            "amount": 40,
+            "mineTime": 180
+        },
+        {
+            "name": "barrel",
+            "produceTime": 1800,
+            "icon": "Icon_barrel.png",
+            "level": 35,
+            "amount": 210,
+            "mineTime": null
+        },
+        {
+            "name": "plywood",
+            "produceTime": 3600,
+            "icon": "Icon_plywood.png",
+            "level": 60,
+            "amount": 160,
+            "mineTime": null
+        },
+        {
+            "name": "pallet",
+            "produceTime": 900,
+            "icon": "Icon_pallet.png",
+            "level": 70,
+            "amount": 120,
+            "mineTime": null
+        },
+        {
+            "name": "pencils",
+            "produceTime": 1200,
+            "icon": "Icon_pencils.png",
+            "level": 280,
+            "amount": 340,
+            "mineTime": null
+        },
+        {
+            "name": "paper",
+            "produceTime": 1800,
+            "icon": "Icon_paper.png",
+            "level": 330,
+            "amount": 140,
+            "mineTime": null
+        },
+        {
+            "name": "book",
+            "produceTime": 3600,
+            "icon": "Icon_book.png",
+            "level": 380,
+            "amount": 440,
+            "mineTime": null
+        },
+        {
+            "name": "windows",
+            "produceTime": 4500,
+            "icon": "Icon_window.png",
+            "level": 440,
+            "amount": 300,
+            "mineTime": null
+        },
+        {
+            "name": "chair",
+            "produceTime": 1800,
+            "icon": "Icon_chair.png",
+            "level": 20,
+            "amount": 120,
+            "mineTime": null
+        },
+        {
+            "name": "table",
+            "produceTime": 3600,
+            "icon": "Icon_table.png",
+            "level": 28,
+            "amount": 150,
+            "mineTime": null
+        },
+        {
+            "name": "closet",
+            "produceTime": 1800,
+            "icon": "Icon_closet.png",
+            "level": 90,
+            "amount": 200,
+            "mineTime": null
+        },
+        {
+            "name": "plastic furniture",
+            "produceTime": 1800,
+            "icon": "Icon_plastic_furniture.png",
+            "level": 174,
+            "amount": 200,
+            "mineTime": null
+        },
+        {
+            "name": "sofa",
+            "produceTime": 6300,
+            "icon": "Icon_sofa.png",
+            "level": 192,
+            "amount": 240,
+            "mineTime": null
+        },
+        {
+            "name": "shirts",
+            "produceTime": 900,
+            "icon": "Icon_shirt.png",
+            "level": 530,
+            "amount": 350,
+            "mineTime": null
+        },
+        {
+            "name": "jackets",
+            "produceTime": 3600,
+            "icon": "Icon_jacket.png",
+            "level": 580,
+            "amount": 270,
+            "mineTime": null
+        },
+        {
+            "name": "safety wear",
+            "produceTime": null,
+            "icon": "",
+            "level": 1135,
+            "amount": 550,
+            "mineTime": null
+        },
+        {
+            "name": "gasoline",
+            "produceTime": 1800,
+            "icon": "Icon_gasoline.png",
+            "level": 41,
+            "amount": 50,
+            "mineTime": 180
+        },
+        {
+            "name": "glue",
+            "produceTime": 1200,
+            "icon": "Icon_glue.png",
+            "level": 50,
+            "amount": 100,
+            "mineTime": null
+        },
+        {
+            "name": "plastics",
+            "produceTime": 900,
+            "icon": "Icon_plastics.png",
+            "level": 138,
+            "amount": 100,
+            "mineTime": null
+        },
+        {
+            "name": "paint",
+            "produceTime": 3600,
+            "icon": "Icon_paint.png",
+            "level": 240,
+            "amount": 200,
+            "mineTime": null
+        },
+        {
+            "name": "textile",
+            "produceTime": 900,
+            "icon": "Icon_textile.png",
+            "level": 502,
+            "amount": 150,
+            "mineTime": null
+        },
+        {
+            "name": "tire",
+            "produceTime": 600,
+            "icon": "Icon_tire.png",
+            "level": 780,
+            "amount": 240,
+            "mineTime": null
+        },
+        {
+            "name": "lithium",
+            "produceTime": null,
+            "icon": null,
+            "level": 1005,
+            "amount": 150,
+            "mineTime": null
+        },
+        {
+            "name": "flour",
+            "produceTime": 1200,
+            "icon": "Icon_flour.png",
+            "level": 102,
+            "amount": 60,
+            "mineTime": 180
+        },
+        {
+            "name": "milk",
+            "produceTime": 1800,
+            "icon": "Icon_milk.png",
+            "level": 120,
+            "amount": 80,
+            "mineTime": null
+        },
+        {
+            "name": "wool",
+            "produceTime": 600,
+            "icon": "Icon_wool.png",
+            "level": 156,
+            "amount": 120,
+            "mineTime": null
+        },
+        {
+            "name": "salt",
+            "produceTime": 900,
+            "icon": "Icon_salt.png",
+            "level": 202,
+            "amount": 60,
+            "mineTime": 180
+        },
+        {
+            "name": "cheese",
+            "produceTime": 4500,
+            "icon": "Icon_cheese.png",
+            "level": 220,
+            "amount": 140,
+            "mineTime": null
+        },
+        {
+            "name": "bread",
+            "produceTime": 3600,
+            "icon": "Icon_bread.png",
+            "level": 260,
+            "amount": 120,
+            "mineTime": null
+        },
+        {
+            "name": "pie",
+            "produceTime": 2700,
+            "icon": "Icon_pie.png",
+            "level": 355,
+            "amount": 200,
+            "mineTime": null
+        },
+        {
+            "name": "beer",
+            "produceTime": 5400,
+            "icon": "Icon_beer.png",
+            "level": 655,
+            "amount": 220,
+            "mineTime": null
+        },
+        {
+            "name": "cement",
+            "produceTime": 600,
+            "icon": "Icon_cement.png",
+            "level": 302,
+            "amount": 200,
+            "mineTime": null
+        },
+        {
+            "name": "bricks",
+            "produceTime": 2700,
+            "icon": "Icon_bricks.png",
+            "level": 420,
+            "amount": 200,
+            "mineTime": null
+        },
+        {
+            "name": "bottles",
+            "produceTime": 900,
+            "icon": "Icon_bottles.png",
+            "level": 460,
+            "amount": 120,
+            "mineTime": null
+        },
+        {
+            "name": "insulation",
+            "produceTime": 900,
+            "icon": "Icon_insulation.png",
+            "level": 480,
+            "amount": 240,
+            "mineTime": null
+        },
+        {
+            "name": "electric parts",
+            "produceTime": 2700,
+            "icon": "Icon_electronic_parts.png",
+            "level": 555,
+            "amount": 210,
+            "mineTime": null
+        },
+        {
+            "name": "plaster",
+            "produceTime": null,
+            "icon": "Icon_plaster.png",
+            "level": 805,
+            "amount": 100,
+            "mineTime": null
+        },
+        {
+            "name": "drywall",
+            "produceTime": null,
+            "icon": "Icon_drywall.png",
+            "level": 835,
+            "amount": 240,
+            "mineTime": 180
+        },
+        {
+            "name": "precast concrete",
+            "produceTime": null,
+            "icon": "Icon_precast_concrete.png",
+            "level": 870,
+            "amount": 470,
+            "mineTime": null
+        },
+        {
+            "name": "tv",
+            "produceTime": 1800,
+            "icon": "Icon_tv.png",
+            "level": 680,
+            "amount": 430,
+            "mineTime": null
+        },
+        {
+            "name": "lightbulbs",
+            "produceTime": 3600,
+            "icon": "Icon_lightbulb.png",
+            "level": 755,
+            "amount": 320,
+            "mineTime": null
+        },
+        {
+            "name": "batteries",
+            "produceTime": null,
+            "icon": null,
+            "level": 1035,
+            "amount": 220,
+            "mineTime": null
+        },
+        {
+            "name": "car",
+            "produceTime": null,
+            "icon": null,
+            "level": 1070,
+            "amount": 640,
+            "mineTime": null
+        },
+        {
+            "name": "truck",
+            "produceTime": null,
+            "icon": null,
+            "level": 1170,
+            "amount": 690,
+            "mineTime": null
+        },
+        {
+            "name": "engine",
+            "produceTime": 0,
+            "icon": null,
+            "level": 980,
+            "amount": 350,
+            "mineTime": null
+        }
+    ],
+    "materials": [
+        {
+            "product": "steel",
+            "material": "iron ore",
+            "amount": 10,
+            "isResource": true
+        },
+        {
+            "product": "steel",
+            "material": "coal",
+            "amount": 30,
+            "isResource": true
+        },
+        {
+            "product": "copper",
+            "material": "copper ore",
+            "amount": 40,
+            "isResource": true
+        },
+        {
+            "product": "copper",
+            "material": "coal",
+            "amount": 40,
+            "isResource": true
+        },
+        {
+            "product": "glass",
+            "material": "sand",
+            "amount": 80,
+            "isResource": true
+        },
+        {
+            "product": "glass",
+            "material": "limestone",
+            "amount": 40,
+            "isResource": true
+        },
+        {
+            "product": "nickel",
+            "material": "nickel ore",
+            "amount": 40,
+            "isResource": true
+        },
+        {
+            "product": "nickel",
+            "material": "coal",
+            "amount": 160,
+            "isResource": true
+        },
+        {
+            "product": "tungsten",
+            "material": "tungsten ore",
+            "amount": 80,
+            "isResource": true
+        },
+        {
+            "product": "aluminium",
+            "material": "bauxite",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "aluminium",
+            "material": "nickel",
+            "amount": 50,
+            "isResource": false
+        },
+        {
+            "product": "titanium",
+            "material": "titanium ore",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "iron powder",
+            "material": "iron ore",
+            "amount": 30,
+            "isResource": true
+        },
+        {
+            "product": "nails",
+            "material": "steel",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "saw blade",
+            "material": "steel",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "saw blade",
+            "material": "iron powder",
+            "amount": 30,
+            "isResource": false
+        },
+        {
+            "product": "copper wire",
+            "material": "copper",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "copper wire",
+            "material": "copper ore",
+            "amount": 30,
+            "isResource": true
+        },
+        {
+            "product": "sheet steel",
+            "material": "steel",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "sheet steel",
+            "material": "iron ore",
+            "amount": 30,
+            "isResource": true
+        },
+        {
+            "product": "stainless steel",
+            "material": "nickel",
+            "amount": 200,
+            "isResource": false
+        },
+        {
+            "product": "stainless steel",
+            "material": "iron ore",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "stainless steel",
+            "material": "coal",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "steel wire",
+            "material": "steel",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "steel wire",
+            "material": "tungsten",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "timber",
+            "material": "wood",
+            "amount": 40,
+            "isResource": true
+        },
+        {
+            "product": "barrel",
+            "material": "wood",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "barrel",
+            "material": "copper wire",
+            "amount": 110,
+            "isResource": false
+        },
+        {
+            "product": "plywood",
+            "material": "glue",
+            "amount": 100,
+            "isResource": false
+        },
+        {
+            "product": "plywood",
+            "material": "wood",
+            "amount": 60,
+            "isResource": true
+        },
+        {
+            "product": "pallet",
+            "material": "timber",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "pallet",
+            "material": "nails",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "pencils",
+            "material": "timber",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "pencils",
+            "material": "paint",
+            "amount": 200,
+            "isResource": false
+        },
+        {
+            "product": "pencils",
+            "material": "coal",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "paper",
+            "material": "wood",
+            "amount": 80,
+            "isResource": true
+        },
+        {
+            "product": "paper",
+            "material": "limestone",
+            "amount": 60,
+            "isResource": true
+        },
+        {
+            "product": "book",
+            "material": "paper",
+            "amount": 140,
+            "isResource": false
+        },
+        {
+            "product": "book",
+            "material": "glue",
+            "amount": 100,
+            "isResource": false
+        },
+        {
+            "product": "book",
+            "material": "paint",
+            "amount": 200,
+            "isResource": false
+        },
+        {
+            "product": "windows",
+            "material": "timber",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "windows",
+            "material": "glass",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "windows",
+            "material": "glue",
+            "amount": 100,
+            "isResource": false
+        },
+        {
+            "product": "chair",
+            "material": "timber",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "chair",
+            "material": "nails",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "table",
+            "material": "timber",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "table",
+            "material": "saw blade",
+            "amount": 70,
+            "isResource": false
+        },
+        {
+            "product": "closet",
+            "material": "plywood",
+            "amount": 160,
+            "isResource": false
+        },
+        {
+            "product": "closet",
+            "material": "nails",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "plastic furniture",
+            "material": "plastics",
+            "amount": 200,
+            "isResource": false
+        },
+        {
+            "product": "sofa",
+            "material": "wool",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "sofa",
+            "material": "timber",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "sofa",
+            "material": "nails",
+            "amount": 40,
+            "isResource": false
+        },
+        {
+            "product": "shirts",
+            "material": "paint",
+            "amount": 200,
+            "isResource": false
+        },
+        {
+            "product": "shirts",
+            "material": "textile",
+            "amount": 150,
+            "isResource": false
+        },
+        {
+            "product": "jackets",
+            "material": "textile",
+            "amount": 150,
+            "isResource": false
+        },
+        {
+            "product": "jackets",
+            "material": "wool",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "safety wear",
+            "material": "textile",
+            "amount": 150,
+            "isResource": false
+        },
+        {
+            "product": "safety wear",
+            "material": "paint",
+            "amount": 400,
+            "isResource": false
+        },
+        {
+            "product": "gasoline",
+            "material": "crude oil",
+            "amount": 50,
+            "isResource": true
+        },
+        {
+            "product": "glue",
+            "material": "crude oil",
+            "amount": 50,
+            "isResource": true
+        },
+        {
+            "product": "glue",
+            "material": "wood",
+            "amount": 50,
+            "isResource": true
+        },
+        {
+            "product": "plastics",
+            "material": "crude oil",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "paint",
+            "material": "crude oil",
+            "amount": 200,
+            "isResource": true
+        },
+        {
+            "product": "textile",
+            "material": "cotton",
+            "amount": 50,
+            "isResource": true
+        },
+        {
+            "product": "textile",
+            "material": "plastics",
+            "amount": 100,
+            "isResource": false
+        },
+        {
+            "product": "tire",
+            "material": "crude oil",
+            "amount": 120,
+            "isResource": true
+        },
+        {
+            "product": "tire",
+            "material": "steel wire",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "lithium",
+            "material": "lithium brine",
+            "amount": 150,
+            "isResource": true
+        },
+        {
+            "product": "flour",
+            "material": "grain",
+            "amount": 60,
+            "isResource": true
+        },
+        {
+            "product": "milk",
+            "material": "livestock",
+            "amount": 80,
+            "isResource": true
+        },
+        {
+            "product": "wool",
+            "material": "livestock",
+            "amount": 120,
+            "isResource": true
+        },
+        {
+            "product": "salt",
+            "material": "rock salt",
+            "amount": 60,
+            "isResource": true
+        },
+        {
+            "product": "cheese",
+            "material": "milk",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "cheese",
+            "material": "salt",
+            "amount": 60,
+            "isResource": false
+        },
+        {
+            "product": "bread",
+            "material": "flour",
+            "amount": 60,
+            "isResource": false
+        },
+        {
+            "product": "bread",
+            "material": "salt",
+            "amount": 60,
+            "isResource": false
+        },
+        {
+            "product": "pie",
+            "material": "flour",
+            "amount": 60,
+            "isResource": false
+        },
+        {
+            "product": "pie",
+            "material": "salt",
+            "amount": 60,
+            "isResource": false
+        },
+        {
+            "product": "pie",
+            "material": "milk",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "beer",
+            "material": "grain",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "beer",
+            "material": "bottles",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "cement",
+            "material": "limestone",
+            "amount": 50,
+            "isResource": true
+        },
+        {
+            "product": "cement",
+            "material": "coal",
+            "amount": 150,
+            "isResource": true
+        },
+        {
+            "product": "bricks",
+            "material": "sand",
+            "amount": 80,
+            "isResource": true
+        },
+        {
+            "product": "bricks",
+            "material": "limestone",
+            "amount": 120,
+            "isResource": true
+        },
+        {
+            "product": "bottles",
+            "material": "glass",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "insulation",
+            "material": "glass",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "insulation",
+            "material": "wool",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "electric parts",
+            "material": "plastics",
+            "amount": 100,
+            "isResource": false
+        },
+        {
+            "product": "electric parts",
+            "material": "copper wire",
+            "amount": 110,
+            "isResource": false
+        },
+        {
+            "product": "plaster",
+            "material": "gypsum",
+            "amount": 100,
+            "isResource": true
+        },
+        {
+            "product": "drywall",
+            "material": "plaster",
+            "amount": 100,
+            "isResource": false
+        },
+        {
+            "product": "drywall",
+            "material": "paper",
+            "amount": 140,
+            "isResource": false
+        },
+        {
+            "product": "precast concrete",
+            "material": "cement",
+            "amount": 200,
+            "isResource": false
+        },
+        {
+            "product": "precast concrete",
+            "material": "sand",
+            "amount": 150,
+            "isResource": true
+        },
+        {
+            "product": "precast concrete",
+            "material": "steel wire",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "tv",
+            "material": "glass",
+            "amount": 120,
+            "isResource": false
+        },
+        {
+            "product": "tv",
+            "material": "plastics",
+            "amount": 100,
+            "isResource": false
+        },
+        {
+            "product": "tv",
+            "material": "electric parts",
+            "amount": 210,
+            "isResource": false
+        },
+        {
+            "product": "lightbulbs",
+            "material": "glass",
+            "amount": 240,
+            "isResource": false
+        },
+        {
+            "product": "lightbulbs",
+            "material": "tungsten",
+            "amount": 80,
+            "isResource": false
+        },
+        {
+            "product": "batteries",
+            "material": "lithium",
+            "amount": 150,
+            "isResource": false
+        },
+        {
+            "product": "batteries",
+            "material": "sheet steel",
+            "amount": 70,
+            "isResource": false
+        },
+        {
+            "product": "car",
+            "material": "tire",
+            "amount": 240,
+            "isResource": false
+        },
+        {
+            "product": "car",
+            "material": "gasoline",
+            "amount": 50,
+            "isResource": false
+        },
+        {
+            "product": "car",
+            "material": "engine",
+            "amount": 350,
+            "isResource": false
+        },
+        {
+            "product": "truck",
+            "material": "tire",
+            "amount": 240,
+            "isResource": false
+        },
+        {
+            "product": "truck",
+            "material": "engine",
+            "amount": 350,
+            "isResource": false
+        },
+        {
+            "product": "truck",
+            "material": "titanium",
+            "amount": 100,
+            "isResource": false
+        }
+    ]
+}
