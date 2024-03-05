@@ -18,6 +18,20 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart';
+
+final Image _defaultIcon = Image.asset("assets/icons/Icon_404.png", width: 50, height: 50);
+
+Image loadIcon(String? name, Uint8List? blob) {
+  if (blob != null) {
+    return Image.memory(blob, width: 50, height: 50);
+  }
+  if (name != null) {
+    return Image.asset("assets/icons/$name", width: 50, height: 50, errorBuilder: (context, error, stackTrace) => _defaultIcon);
+  }
+  return _defaultIcon;
+}
+
 /// Mining material
 class Resource {
   String name;

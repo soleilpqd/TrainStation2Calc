@@ -16,10 +16,16 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/models.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 
 class DatabasePage extends StatefulWidget {
   const DatabasePage({super.key});
@@ -66,23 +72,23 @@ class _DatabasePageState extends State<DatabasePage> {
               0: FixedColumnWidth(80),
               1: FlexColumnWidth(),
               2: FixedColumnWidth(64),
-              3: FixedColumnWidth(64)
+              3: FixedColumnWidth(50)
             },
             children: List<TableRow>.generate(numOfRows, (index) {
               if (index == 0) {
                 return TableRow(
                   decoration: const BoxDecoration(color: Colors.white),
                   children: [
-                    Container(height: 64),
-                    Text(
-                      _dataController.resources.isNotEmpty ? "MINERALS" : "PRODUCTS",
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)
-                    ),
-                    Container(),
                     IconButton(
                       onPressed: _dataController.resources.isNotEmpty ? _addNewResourceOnTap : _addNewProductOnTap,
                       icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary)
                     ),
+                    Text(
+                      _dataController.resources.isNotEmpty ? "MINERALS" : "PRODUCTS",
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)
+                    ),
+                    Container(height: 50),
+                    const Text("Enable", style: TextStyle(color: Colors.black)),
                   ]
                 );
               }
@@ -91,13 +97,13 @@ class _DatabasePageState extends State<DatabasePage> {
                   return TableRow(
                     decoration: const BoxDecoration(color: Colors.white),
                     children: [
-                      Container(height: 64),
-                      const Text("PRODUCTS", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-                      const Text("Minable", style: TextStyle(color: Colors.black)),
                       IconButton(
                         onPressed: _addNewProductOnTap,
                         icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary)
                       ),
+                      const Text("PRODUCTS", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+                      const Text("Minable", style: TextStyle(color: Colors.black)),
+                      const Text("Enable", style: TextStyle(color: Colors.black))
                     ]
                   );
                 }
@@ -118,11 +124,9 @@ class _DatabasePageState extends State<DatabasePage> {
     final resource = _dataController.resources[index];
     return TableRow(
       children: [
-        Image.asset(
-          "assets/icons/${resource.icon ?? "Icon_404.png"}",
-          width: 64,
-          height: 64,
-          errorBuilder: (context, error, stackTrace) => Image.asset("assets/icons/Icon_404.png", width: 64, height: 64),
+        IconButton(
+          onPressed: () => _iconResourceOnTap(index),
+          icon: loadIcon(resource.icon, resource.iconBlob)
         ),
         TextButton(
           onPressed: () => _resourceRowOnSelection(index),
@@ -146,11 +150,9 @@ class _DatabasePageState extends State<DatabasePage> {
     final product = _dataController.products[index];
     return TableRow(
       children: [
-        Image.asset(
-          "assets/icons/${product.icon ?? "Icon_404.png"}",
-          width: 64,
-          height: 64,
-          errorBuilder: (context, error, stackTrace) => Image.asset("assets/icons/Icon_404.png", width: 64, height: 64),
+        IconButton(
+          onPressed: () => _iconProductOnTap(index),
+          icon: loadIcon(product.icon, product.iconBlob)
         ),
         TextButton(
           onPressed: () => _productRowOnSelection(index),
@@ -238,6 +240,113 @@ class _DatabasePageState extends State<DatabasePage> {
 
   void _removeProductOnTap() {
 
+  }
+
+  void _iconResourceOnTap(int index) {
+    _showIconSettings(_dataController.resources[index].name, (image) {
+      Uint8List? blob;
+      if (image != null) {
+        blob = img.encodeJpg(image);
+      }
+      _dataController.updateResourceIcon(index, blob).then((value) => setState(() {}));
+    });
+  }
+
+  void _iconProductOnTap(int index) {
+    _showIconSettings(_dataController.products[index].name, (image) {
+      Uint8List? blob;
+      if (image != null) {
+        blob = img.encodeJpg(image);
+      }
+      _dataController.updateProductIcon(index, blob).then((value) => setState(() {}));
+    });
+  }
+
+  void _showIconSettings(String title, Function(img.Image?) completion) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Wrap(children: [Column(
+        children: [
+          const SizedBox(height: 16, width: 300),
+          Text("Icon setting for \"$title\"", style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16, width: 300),
+          TextButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+              backgroundColor: MaterialStateProperty.all(Colors.white)
+            ),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              _pickImage(context, completion);
+            },
+            child: const Text("Pick from file")
+          ),
+          const SizedBox(height: 16, width: 300),
+          TextButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+              backgroundColor: MaterialStateProperty.all(Colors.white)
+            ),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              completion(null);
+            },
+            child: const Text("Default", style: TextStyle(color: Colors.red))
+          ),
+          const SizedBox(height: 16, width: 300),
+          TextButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+              backgroundColor: MaterialStateProperty.all(Colors.white)
+            ),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: const Text("Cancel")
+          ),
+          const SizedBox(height: 50, width: 300)
+        ]
+      )])
+    );
+  }
+
+  void _pickImage(BuildContext context, Function(img.Image?) completion) async {
+    final ImagePicker picker = ImagePicker();
+    try {
+      XFile? file = await picker.pickImage(source: ImageSource.gallery, maxHeight: 50.0);
+      if (file != null) {
+        Uint8List data = await file.readAsBytes();
+        final cmd = img.Command()
+          ..decodeImage(data)
+          ..copyResize(height: 50);
+        await cmd.executeThread();
+        completion(cmd.outputImage);
+      }
+    } on Exception {
+      if (context.mounted) {
+        showDialog(context: context, builder: ((ctx) {
+          return AlertDialog(
+            title: const Text("Something wrong"),
+            content: const Text("Fail to load given image. Please select a differenct one."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _pickImage(context, completion);
+                },
+                child: const Text("Retry")
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Close")
+              )
+            ],
+          );
+        }));
+      }
+    }
   }
 
 }
@@ -397,6 +506,20 @@ class _DatabasePageDataController {
     await db.updateProduct(product);
   }
 
+  Future<void> updateResourceIcon(int index, Uint8List? value) async {
+    final Resource resource = resources[index];
+    resource.iconBlob = value;
+    MaterialDatabase db = MaterialDatabase();
+    await db.updateResource(resource);
+  }
+
+  Future<void> updateProductIcon(int index, Uint8List? value) async {
+    final Product product = products[index];
+    product.iconBlob = value;
+    MaterialDatabase db = MaterialDatabase();
+    await db.updateProduct(product);
+  }
+
   Future<void> enableByLevel(int level) async {
     for (Resource resource in resources) {
       resource.enable = resource.level <= level;
@@ -405,6 +528,9 @@ class _DatabasePageDataController {
 
     for (Product product in products) {
       product.enable = product.level <= level;
+      if (product.mineTime != null) {
+        product.mineable = product.enable;
+      }
     }
     await MaterialDatabase().updateProducts(products);
   }

@@ -16,6 +16,8 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:train_station_2_calc/database.dart';
@@ -212,9 +214,10 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
       decoration: BoxDecoration(color: section.rawValue < _HomePageSection.result.rawValue ? Colors.white : Theme.of(context).colorScheme.primary),
       children: [
         SizedBox(
-          height: 64,
+          height: 48,
           child: section.rawValue < _HomePageSection.result.rawValue ?
             IconButton(
+              iconSize: 32,
               icon: Icon(isFolded ? Icons.arrow_right : Icons.arrow_drop_down, color: Theme.of(context).colorScheme.primary),
               onPressed: () => _sectionOnFolding(section)
             ) :
@@ -235,7 +238,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
           )
         ),
         section.rawValue < _HomePageSection.result.rawValue ?
-          IconButton(onPressed: () => _addItem(section), icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary)) :
+          IconButton(onPressed: () => _addItem(section), icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary), iconSize: 32) :
           const Text("Prod", textAlign: TextAlign.center),
       ]
     );
@@ -244,25 +247,23 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
   TableRow _makeRow(_HomePageSection section, int index) {
     ProductionJob item = _dataController.items[section.rawValue][index];
     String? icon;
+    Uint8List? blob;
     String prodCount = "";
     if (item.isResource) {
       Resource? resource = _dataController.getResource(item.material);
       icon = resource?.icon;
+      blob = resource?.iconBlob;
     } else {
       Product? product = _dataController.getProduct(item.material);
       icon = product?.icon;
+      blob = product?.iconBlob;
       if (product != null && section == _HomePageSection.result && !product.mineable) {
         prodCount = "${item.amount ~/ product.amount}";
       }
     }
     return TableRow(
       children: [
-        Image.asset(
-          "assets/icons/${icon ?? "Icon_404.png"}",
-          width: 64,
-          height: 64,
-          errorBuilder: (context, error, stackTrace) => Image.asset("assets/icons/Icon_404.png", width: 64, height: 64),
-        ),
+        loadIcon(icon, blob),
         TextButton(
           onPressed: () => _itemOnSelection(section, index),
           style: ButtonStyle(
@@ -465,6 +466,7 @@ class _MyHomePageDataController {
     while (prodJobQueue.isNotEmpty) {
       await _doCalculate(prodJobQueue, inventoryResources, inventoryProducts);
     }
+    _sortResult();
   }
 
   Future<void> _doCalculate(List<ProductionJob> queue, Map<String, int> resourcesInventory, Map<String, int> productsInventory) async {
@@ -540,6 +542,22 @@ class _MyHomePageDataController {
       );
       items[_HomePageSection.result.rawValue].add(newJob);
     }
+  }
+
+  void _sortResult() {
+    List<ProductionJob> target = items[_HomePageSection.result.rawValue];
+    List<ProductionJob> temp = [];
+    List<ProductionJob> temp2 = [];
+    temp.addAll(target);
+    target.clear();
+    for (ProductionJob job in temp.reversed) {
+      if (job.isResource) {
+        target.add(job);
+      } else {
+        temp2.add(job);
+      }
+    }
+    target.addAll(temp2);
   }
 
 }

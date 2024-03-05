@@ -16,6 +16,8 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/models.dart';
@@ -70,16 +72,19 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
             children: List<TableRow>.generate(numOfRows, (index) {
               String name = "";
               String? icon;
+              Uint8List? blob;
               if (index >= resources.length) {
                 Product product = products[index - resources.length];
                 name = product.name;
                 icon = product.icon;
+                blob = product.iconBlob;
               } else {
                 Resource resource = resources[index];
                 name = resource.name;
                 icon = resource.icon;
+                blob = resource.iconBlob;
               }
-              return _makeRow(name, icon, index);
+              return _makeRow(name, icon, blob, index);
             }),
           ),
         ],
@@ -87,15 +92,10 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
     );
   }
 
-  TableRow _makeRow(String name, String? icon, int index) {
+  TableRow _makeRow(String name, String? icon, Uint8List? blob, int index) {
     return TableRow(
       children: [
-        Image.asset(
-          "assets/icons/${icon ?? "Icon_404.png"}",
-          width: 64,
-          height: 64,
-          errorBuilder: (context, error, stackTrace) => Image.asset("assets/icons/Icon_404.png", width: 64, height: 64),
-        ),
+        loadIcon(icon, blob),
         TextButton(
           onPressed: () => _rowOnSelection(index),
           style: ButtonStyle(
