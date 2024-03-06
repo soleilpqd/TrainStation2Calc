@@ -24,6 +24,7 @@ import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+import 'package:train_station_2_calc/product_page.dart';
 
 class DatabasePage extends StatefulWidget {
   const DatabasePage({super.key});
@@ -72,7 +73,7 @@ class _DatabasePageState extends State<DatabasePage> {
             border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: const <int, TableColumnWidth>{
-              0: FixedColumnWidth(50),
+              0: FixedColumnWidth(80),
               1: FlexColumnWidth(),
               2: FixedColumnWidth(60),
               3: FixedColumnWidth(40),
@@ -147,22 +148,26 @@ class _DatabasePageState extends State<DatabasePage> {
 
   TableRow _makeProductRow(int index) {
     final product = _dataController.products[index];
+    final bool isProductMineable = product.mineTime != null && product.mineTime! > 0;
     return TableRow(
       children: [
         IconButton(
           onPressed: () => _iconProductOnTap(index),
           icon: loadIcon(product.icon, product.iconBlob)
         ),
-        TextButton(
-          onPressed: () => _productRowOnSelection(index),
-          style: ButtonStyle(
-            alignment: Alignment.centerLeft,
-            foregroundColor: MaterialStateProperty.all(Colors.white),
-            overlayColor: MaterialStateProperty.all(Colors.transparent),
+        isProductMineable && product.mineable ?
+          Text(product.name, style: const TextStyle(color: Colors.white)) :
+          TextButton(
+            onPressed: () => _productRowOnSelection(index),
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all(EdgeInsets.zero),
+              alignment: Alignment.centerLeft,
+              foregroundColor: MaterialStateProperty.all(Colors.white),
+              overlayColor: MaterialStateProperty.all(Colors.transparent),
+            ),
+            child: Text(product.name, style: const TextStyle(fontWeight: FontWeight.normal)),
           ),
-          child: Text(product.name),
-        ),
-        product.mineable && product.mineTime != null && product.mineTime! > 0 ?
+        isProductMineable && product.mineable ?
           Container() :
           TextButton(
             onPressed: () => _productProductionAmountOnTap(index),
@@ -171,9 +176,9 @@ class _DatabasePageState extends State<DatabasePage> {
               foregroundColor: MaterialStateProperty.all(Colors.white),
               // overlayColor: MaterialStateProperty.all(Colors.transparent),
             ),
-            child: Text(_numberFormat.format(product.amount)),
+            child: Text(_numberFormat.format(product.amount), style: const TextStyle(fontWeight: FontWeight.normal)),
           ),
-        product.mineTime != null && product.mineTime! > 0 ?
+        isProductMineable ?
           Checkbox(
             value: product.mineable,
             onChanged: (newValue) => _mineableEnableOnChange(index, newValue ?? false)
@@ -222,7 +227,8 @@ class _DatabasePageState extends State<DatabasePage> {
   }
 
   void _productRowOnSelection(int index) {
-
+    final Product product = _dataController.products[index];
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ProductPage(product: product)));
   }
 
   void _resourceEnableOnChange(int index, bool value) {
