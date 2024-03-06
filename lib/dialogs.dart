@@ -5,7 +5,7 @@ Future<void> inputNumberDialogBuilder(BuildContext context, String title, String
   TextEditingController controller = TextEditingController(text: initValue);
   return showDialog<void>(
     context: context,
-    builder: (BuildContext context) {
+    builder: (dlgCtx) {
       return AlertDialog(
         title: Text(title),
         content: TextField(
@@ -21,13 +21,13 @@ Future<void> inputNumberDialogBuilder(BuildContext context, String title, String
           TextButton(
             child: const Text('Cancel'),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dlgCtx).pop();
             },
           ),
           TextButton(
             child: const Text('OK'),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(dlgCtx).pop();
               completion(controller.text);
             },
           ),
@@ -35,4 +35,28 @@ Future<void> inputNumberDialogBuilder(BuildContext context, String title, String
       );
     },
   );
+}
+
+void showRetry(BuildContext context, String title, String message, Function() retry) {
+  showDialog(context: context, builder: ((dlgCtx) {
+    return AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(dlgCtx).pop();
+            retry();
+          },
+          child: const Text("Retry")
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(dlgCtx).pop();
+          },
+          child: const Text("Close")
+        )
+      ],
+    );
+  }));
 }

@@ -18,6 +18,7 @@
 
 import 'dart:typed_data';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -225,32 +226,35 @@ class MaterialDatabase {
     return result;
   }
 
-  Future<List<Resource>> loadEnableResources({List<String>? excluded, List<String>? included}) async {
-    String whereStatment = "enable > 0";
-    List<String> whereArgs = [];
+  String _buildWhereStatement(List<String>? excluded, List<String>? included, bool enable, List<String> whereArgs) {
+    String whereStatment = enable ? "enable > 0" : "";
     if (excluded != null && excluded.isNotEmpty) {
-      whereStatment += " AND name NOT IN ${_buildArrayQuery(excluded.length)}";
+      if (whereStatment.isNotEmpty) {
+        whereStatment += " AND ";
+      }
+      whereStatment += "name NOT IN ${_buildArrayQuery(excluded.length)}";
       whereArgs.addAll(excluded);
     }
     if (included != null && included.isNotEmpty) {
-      whereStatment += " AND name IN ${_buildArrayQuery(included.length)}";
+      if (whereStatment.isNotEmpty) {
+        whereStatment += " AND ";
+      }
+      whereStatment += "name IN ${_buildArrayQuery(included.length)}";
       whereArgs.addAll(included);
     }
+    return whereStatment;
+  }
+
+  Future<List<Resource>> loadEnableResources({List<String>? excluded, List<String>? included, bool enable = true}) async {
+    List<String> whereArgs = [];
+    String whereStatment = _buildWhereStatement(excluded, included, enable, whereArgs);
     List<Map<String, Object?>> listRaw = await _db!.query("resource", where: whereStatment, whereArgs: whereArgs, orderBy: "level ASC, name ASC");
     return listRaw.map((item) => _remapResource(item)).toList();
   }
 
-  Future<List<Product>> loadEnableProducts({List<String>? excluded, List<String>? included}) async {
-    String whereStatment = "enable > 0";
+  Future<List<Product>> loadEnableProducts({List<String>? excluded, List<String>? included, bool enable = true}) async {
     List<String> whereArgs = [];
-    if (excluded != null && excluded.isNotEmpty) {
-      whereStatment += " AND name NOT IN ${_buildArrayQuery(excluded.length)}";
-      whereArgs.addAll(excluded);
-    }
-    if (included != null && included.isNotEmpty) {
-      whereStatment += " AND name IN ${_buildArrayQuery(included.length)}";
-      whereArgs.addAll(included);
-    }
+    String whereStatment = _buildWhereStatement(excluded, included, enable, whereArgs);
     List<Map<String, Object?>> listRaw = await _db!.query("product", where: whereStatment, whereArgs: whereArgs, orderBy: "level ASC, name ASC");
     return listRaw.map((item) => _remapProduct(item)).toList();
   }
@@ -316,6 +320,56 @@ LEFT OUTER JOIN product ON job.material == product.name
 WHERE product.enable > 0 OR resource.enable > 0
 """)).map((element) => _remapJob(element)).toList();
     return result;
+  }
+
+  Future<bool> insertResource(Resource resource) async {
+    final Database db = _db!;
+    try {
+      await db.insert("resource", _mapResource(resource));
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  Future<bool> deleteResource(String name) async {
+    final Database db = _db!;
+    try {
+      await db.delete("resource", where: "name == ?", whereArgs: [name]);
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  Future<bool> insertProduct(Product product) async {
+    final Database db = _db!;
+    try {
+      await db.insert("product", _mapProduct(product));
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  Future<bool> deleteProduct(String name) async {
+    final Database db = _db!;
+    try {
+      await db.delete("product", where: "name == ?", whereArgs: [name]);
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  Future<bool> insertMaterial(ProductMaterial material) async {
+    final Database db = _db!;
+    try {
+      await db.insert("material", _mapMaterial(material));
+      return true;
+    } on Exception {
+      return false;
+    }
   }
 
 }

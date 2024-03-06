@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext wgBuildCtx) {
     final List<int> lengths = [
       _foldedSections.contains(_HomePageSection.input) ? 0 : _dataController.items[_HomePageSection.input.rawValue].length,
       _foldedSections.contains(_HomePageSection.inventory) ? 0 : _dataController.items[_HomePageSection.inventory.rawValue].length,
@@ -131,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     }
     if (!MaterialDatabase().isOpen) {
       return Container(
-        color: Theme.of(context).colorScheme.primary,
+        color: Theme.of(wgBuildCtx).colorScheme.primary,
         child: const Center(
           child: Text(
             "Train Station 2 Calculator",
@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(wgBuildCtx).colorScheme.primary,
         title: Text(widget.title),
         actions: [
           IconButton(
@@ -157,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
             icon: const Icon(Icons.storage),
             onPressed: () {
               _shouldReloadData = true;
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const DatabasePage()));
+              Navigator.push(wgBuildCtx, MaterialPageRoute(builder: (_) => const DatabasePage()));
             }
           )
         ],
@@ -296,7 +296,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     }
     showDialog(
       context: context,
-      builder: (ctx) => DataSelectionPage(
+      builder: (_) => DataSelectionPage(
         excludedResources: excludedResources,
         excludedProducts: excludedProducts,
         completion: (Resource? resource, Product? product) {
