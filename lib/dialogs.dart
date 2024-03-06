@@ -36,3 +36,21 @@ Future<void> inputNumberDialogBuilder(BuildContext context, String title, String
     },
   );
 }
+
+BuildContext? _loadingContext;
+
+void showLoading(BuildContext context) {
+  _loadingContext = context;
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => const Center(child: Wrap(children: [CircularProgressIndicator()]))
+  );
+}
+
+void closeLoading() {
+  if (_loadingContext != null) {
+    Navigator.of(_loadingContext!).pop();
+    _loadingContext = null;
+  }
+}

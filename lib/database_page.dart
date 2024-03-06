@@ -17,10 +17,8 @@
  */
 
 
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/models.dart';
@@ -314,15 +312,18 @@ class _DatabasePageState extends State<DatabasePage> {
     final ImagePicker picker = ImagePicker();
     try {
       XFile? file = await picker.pickImage(source: ImageSource.gallery, maxHeight: 50.0);
-      if (file != null) {
+      if (file != null && context.mounted) {
+        showLoading(context);
         Uint8List data = await file.readAsBytes();
         final cmd = img.Command()
           ..decodeImage(data)
           ..copyResize(height: 50);
         await cmd.executeThread();
         completion(cmd.outputImage);
+        closeLoading();
       }
     } on Exception {
+      closeLoading();
       if (context.mounted) {
         showDialog(context: context, builder: ((ctx) {
           return AlertDialog(

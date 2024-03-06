@@ -20,13 +20,17 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/database_page.dart';
 import 'package:train_station_2_calc/data_selection_page.dart';
 import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/models.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
   runApp(const MyApp());
 }
 
