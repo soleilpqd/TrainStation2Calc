@@ -1,6 +1,6 @@
 /*
   Train Station 2 Calculator - Simple resource calculator to play TrainStation2
-  Copyright (C) <year>  <name of author>
+  Copyright © 2024 SoleilPQD
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -123,19 +123,16 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext wgBuildCtx) {
     final List<int> lengths = [
       _foldedSections.contains(_HomePageSection.input) ? 0 : _dataController.items[_HomePageSection.input.rawValue].length,
       _foldedSections.contains(_HomePageSection.inventory) ? 0 : _dataController.items[_HomePageSection.inventory.rawValue].length,
       _dataController.items[_HomePageSection.result.rawValue].length,
     ];
-    int numOfRows = lengths.length;
-    for (int item in lengths) {
-      numOfRows += item;
-    }
+    final int numOfRows = TableIndex.getNumberOrRows(lengths);
     if (!MaterialDatabase().isOpen) {
       return Container(
-        color: Theme.of(context).colorScheme.primary,
+        color: Theme.of(wgBuildCtx).colorScheme.primary,
         child: const Center(
           child: Text(
             "Train Station 2 Calculator",
@@ -146,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(wgBuildCtx).colorScheme.primary,
         title: Text(widget.title),
         actions: [
           IconButton(
@@ -161,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
             icon: const Icon(Icons.storage),
             onPressed: () {
               _shouldReloadData = true;
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const DatabasePage()));
+              Navigator.push(wgBuildCtx, MaterialPageRoute(builder: (_) => const DatabasePage()));
             }
           )
         ],
@@ -179,27 +176,12 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
               3: FixedColumnWidth(40),
             },
             children: List<TableRow>.generate(numOfRows, (index) {
-              int sect = 0;
-              int row = -1;
-              int temp = index;
-              int lIdx = 0;
-              while (temp >= 0 && lIdx < lengths.length) {
-                temp -= lengths[lIdx] + 1;
-                lIdx += 1;
-                if (temp >= 0) {
-                  sect += 1;
-                }
-              }
-              temp = 0;
-              for (int idx = 0; idx < sect; idx += 1) {
-                temp += lengths[idx] + 1;
-              }
-              row = index - temp - 1;
-              _HomePageSection section = _HomePageSection.init(sect);
-              if (row < 0) {
+              final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
+              _HomePageSection section = _HomePageSection.init(tableIndex.section);
+              if (tableIndex.row == null) {
                 return _makeSectionHeader(section);
               }
-              return _makeRow(section, row);
+              return _makeRow(section, tableIndex.row!);
             }),
           ),
         ],
@@ -300,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     }
     showDialog(
       context: context,
-      builder: (ctx) => DataSelectionPage(
+      builder: (_) => DataSelectionPage(
         excludedResources: excludedResources,
         excludedProducts: excludedProducts,
         completion: (Resource? resource, Product? product) {

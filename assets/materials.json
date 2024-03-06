@@ -3,7 +3,7 @@
         {
             "name": "iron ore",
             "time": 30,
-            "icon": "Icon_Iron_ore.png",
+            "icon": "Icon_iron_ore.png",
             "level": 1
         },
         {
@@ -51,37 +51,37 @@
         {
             "name": "limestone",
             "time": 300,
-            "icon": null,
+            "icon": "Icon_limestone.png",
             "level": 300
         },
         {
             "name": "sand",
             "time": 300,
-            "icon": null,
+            "icon": "Icon_sand.png",
             "level": 400
         },
         {
             "name": "cotton",
             "time": 300,
-            "icon": null,
+            "icon": "Icon_cotton.png",
             "level": 500
         },
         {
             "name": "nickel ore",
             "time": 300,
-            "icon": null,
+            "icon": "Icon_nickel_ore.png",
             "level": 600
         },
         {
             "name": "tungsten ore",
             "time": 300,
-            "icon": null,
+            "icon": "Icon_tungsten_ore.png",
             "level": 700
         },
         {
             "name": "gypsum",
             "time": 300,
-            "icon": null,
+            "icon": "Icon_gypsum.png",
             "level": 800
         },
         {
@@ -339,7 +339,7 @@
         {
             "name": "safety wear",
             "produceTime": null,
-            "icon": "",
+            "icon": null,
             "level": 1135,
             "amount": 550,
             "mineTime": null
@@ -554,10 +554,18 @@
         },
         {
             "name": "car",
-            "produceTime": null,
-            "icon": null,
-            "level": 1070,
-            "amount": 640,
+            "produceTime": 3600,
+            "icon": "Icon_car.png",
+            "level": 980,
+            "amount": 550,
+            "mineTime": null
+        },
+        {
+            "name": "scooter",
+            "produceTime": 1200,
+            "icon": "Icon_scooter.png",
+            "level": 930,
+            "amount": 300,
             "mineTime": null
         },
         {
@@ -1200,6 +1208,18 @@
             "product": "batteries",
             "material": "sheet steel",
             "amount": 70,
+            "isResource": false
+        },
+        {
+            "product": "scooter",
+            "material": "tire",
+            "amount": 150,
+            "isResource": false
+        },
+        {
+            "product": "scooter",
+            "material": "aluminium",
+            "amount": 150,
             "isResource": false
         },
         {

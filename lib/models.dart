@@ -1,6 +1,6 @@
 /*
   Train Station 2 Calculator - Simple resource calculator to play TrainStation2
-  Copyright (C) <year>  <name of author>
+  Copyright © 2024 SoleilPQD
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -26,10 +26,46 @@ Image loadIcon(String? name, Uint8List? blob) {
   if (blob != null) {
     return Image.memory(blob, width: 50, height: 50);
   }
-  if (name != null) {
+  if (name != null && name.isNotEmpty) {
     return Image.asset("assets/icons/$name", width: 50, height: 50, errorBuilder: (context, error, stackTrace) => _defaultIcon);
   }
   return _defaultIcon;
+}
+
+class TableIndex {
+
+  int section = 0;
+  int? row;
+
+  TableIndex({required int index, required List<int> sectionLengths}) {
+    int section_ = 0;
+    int row_ = -1;
+    int temp = index;
+    int lIdx = 0;
+    while (temp >= 0 && lIdx < sectionLengths.length) {
+      temp -= sectionLengths[lIdx] + 1;
+      lIdx += 1;
+      if (temp >= 0) {
+        section_ += 1;
+      }
+    }
+    temp = 0;
+    for (int idx = 0; idx < section_; idx += 1) {
+      temp += sectionLengths[idx] + 1;
+    }
+    row_ = index - temp - 1;
+    section = section_;
+    row = row_ >= 0 ? row_ : null;
+  }
+
+  static int getNumberOrRows(List<int> sectionLengths) {
+    int numOfRows = sectionLengths.length;
+    for (int item in sectionLengths) {
+      numOfRows += item;
+    }
+    return numOfRows;
+  }
+
 }
 
 /// Mining material
