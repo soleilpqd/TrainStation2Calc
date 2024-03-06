@@ -1,6 +1,6 @@
 /*
   Train Station 2 Calculator - Simple resource calculator to play TrainStation2
-  Copyright (C) <year>  <name of author>
+  Copyright © 2024 SoleilPQD
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/models.dart';
@@ -34,6 +35,7 @@ class DatabasePage extends StatefulWidget {
 class _DatabasePageState extends State<DatabasePage> {
 
   final _DatabasePageDataController _dataController = _DatabasePageDataController();
+  final NumberFormat _numberFormat = NumberFormat("#,###", "en_US");
 
   @override
   void initState() {
@@ -43,7 +45,11 @@ class _DatabasePageState extends State<DatabasePage> {
 
   @override
   Widget build(BuildContext wgBuildCtx) {
-    final numOfRows = (_dataController.resources.isEmpty ? 0 : _dataController.resources.length + 1) + (_dataController.products.isEmpty ? 0 : _dataController.products.length + 1);
+    final List<int> lengths = [
+      _dataController.resources.length,
+      _dataController.products.length
+    ];
+    final int numOfRows = TableIndex.getNumberOrRows(lengths);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(wgBuildCtx).colorScheme.primary,
@@ -66,54 +72,52 @@ class _DatabasePageState extends State<DatabasePage> {
             border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: const <int, TableColumnWidth>{
-              0: FixedColumnWidth(80),
+              0: FixedColumnWidth(50),
               1: FlexColumnWidth(),
-              2: FixedColumnWidth(64),
-              3: FixedColumnWidth(50)
+              2: FixedColumnWidth(60),
+              3: FixedColumnWidth(40),
+              4: FixedColumnWidth(40)
             },
             children: List<TableRow>.generate(numOfRows, (index) {
-              if (index == 0) {
-                return TableRow(
-                  decoration: const BoxDecoration(color: Colors.white),
-                  children: [
-                    IconButton(
-                      onPressed: _dataController.resources.isNotEmpty ? _addNewResourceOnTap : _addNewProductOnTap,
-                      icon: Icon(Icons.add_circle, color: Theme.of(wgBuildCtx).colorScheme.primary)
-                    ),
-                    Text(
-                      _dataController.resources.isNotEmpty ? "MINERALS" : "PRODUCTS",
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)
-                    ),
-                    Container(height: 50),
-                    const Text("Enable", style: TextStyle(color: Colors.black)),
-                  ]
-                );
+              final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
+              if (tableIndex.row == null) {
+                return _makeSectionRow(tableIndex.section);
               }
-              if (_dataController.resources.isNotEmpty) {
-                if (index == _dataController.resources.length + 1) {
-                  return TableRow(
-                    decoration: const BoxDecoration(color: Colors.white),
-                    children: [
-                      IconButton(
-                        onPressed: _addNewProductOnTap,
-                        icon: Icon(Icons.add_circle, color: Theme.of(wgBuildCtx).colorScheme.primary)
-                      ),
-                      const Text("PRODUCTS", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-                      const Text("Minable", style: TextStyle(color: Colors.black)),
-                      const Text("Enable", style: TextStyle(color: Colors.black))
-                    ]
-                  );
-                }
-                if (index <= _dataController.resources.length) {
-                  return _makeResourceRow(index - 1);
-                }
-                return _makeProductRow(index - _dataController.resources.length - 2);
+              if (tableIndex.section == 0) {
+                return _makeResourceRow(tableIndex.row!);
               }
-              return _makeProductRow(index - 1);
+              return _makeProductRow(tableIndex.row!);
             }),
           ),
         ],
       )
+    );
+  }
+
+  TableRow _makeSectionRow(int section) {
+    return TableRow(
+      decoration: const BoxDecoration(color: Colors.white),
+      children: [
+        SizedBox(
+          height: 50,
+          child: IconButton(
+            onPressed: section == 0 ? _addNewResourceOnTap : _addNewProductOnTap,
+            icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
+            iconSize: 32
+          )
+        ),
+        Text(
+          section == 0 ? "MINERALS" : "PRODUCTS",
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)
+        ),
+        section == 0 ?
+          Container() :
+          const Text("Amount", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
+        section == 0 ?
+          Container() :
+          const Text("Minable", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
+        const Text("Enable", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
+      ]
     );
   }
 
@@ -127,14 +131,15 @@ class _DatabasePageState extends State<DatabasePage> {
         ),
         Text(resource.name, textAlign: TextAlign.left, style: const TextStyle(color: Colors.white)),
         Container(),
+        Container(),
         resource.level == 0 ?
           IconButton(
             onPressed: () => _removeResourceOnTap(index),
             icon: const Icon(Icons.delete, color: Colors.red)
           ) :
-          Switch(
+          Checkbox(
             value: resource.enable,
-            onChanged: (bool newValue) => _resourceEnableOnChange(index, newValue)
+            onChanged: (newvalue) => _resourceEnableOnChange(index, newvalue ?? false)
           )
       ]
     );
@@ -157,10 +162,21 @@ class _DatabasePageState extends State<DatabasePage> {
           ),
           child: Text(product.name),
         ),
+        product.mineable && product.mineTime != null && product.mineTime! > 0 ?
+          Container() :
+          TextButton(
+            onPressed: () => _productProductionAmountOnTap(index),
+            style: ButtonStyle(
+              alignment: Alignment.center,
+              foregroundColor: MaterialStateProperty.all(Colors.white),
+              // overlayColor: MaterialStateProperty.all(Colors.transparent),
+            ),
+            child: Text(_numberFormat.format(product.amount)),
+          ),
         product.mineTime != null && product.mineTime! > 0 ?
-          Switch(
+          Checkbox(
             value: product.mineable,
-            onChanged: (bool newValue) => _mineableEnableOnChange(index, newValue)
+            onChanged: (newValue) => _mineableEnableOnChange(index, newValue ?? false)
           ) :
           Container(),
         product.level == 0 ?
@@ -168,9 +184,9 @@ class _DatabasePageState extends State<DatabasePage> {
             onPressed: () => _removeProductOnTap(index),
             icon: const Icon(Icons.delete, color: Colors.red)
           ) :
-          Switch(
+          Checkbox(
             value: product.enable,
-            onChanged: (bool newValue) => _productEnableOnChange(index, newValue)
+            onChanged: (newValue) => _productEnableOnChange(index, newValue ?? false)
           )
       ]
     );
@@ -388,6 +404,19 @@ class _DatabasePageState extends State<DatabasePage> {
     }
   }
 
+  void _productProductionAmountOnTap(int index) {
+    final Product product = _dataController.products[index];
+    inputNumberDialogBuilder(
+      context,
+      "Amount of '${product.name}' per each production",
+      "${product.amount}",
+      (value) {
+        _dataController.updateProductProductionAmount(index, int.parse(value))
+          .then((value) => setState(() {}));
+      }
+    );
+  }
+
 }
 
 class _DatabasePageDataController {
@@ -545,6 +574,13 @@ class _DatabasePageDataController {
     await db.updateProduct(product);
   }
 
+  Future<void> updateProductProductionAmount(int index, int value) async {
+    final Product product = products[index];
+    product.amount = value;
+    MaterialDatabase db = MaterialDatabase();
+    await db.updateProduct(product);
+  }
+
   Future<void> updateResourceIcon(int index, Uint8List? value) async {
     final Resource resource = resources[index];
     resource.iconBlob = value;
@@ -560,6 +596,11 @@ class _DatabasePageDataController {
   }
 
   Future<void> enableByLevel(int level) async {
+    await MaterialDatabase().enableByLevel(level);
+    await loadData();
+  }
+
+  Future<void> _enableByLevel(int level) async {
     for (Resource resource in resources) {
       resource.enable = resource.level <= level;
     }
@@ -567,7 +608,7 @@ class _DatabasePageDataController {
 
     for (Product product in products) {
       product.enable = product.level <= level;
-      if (product.mineTime != null) {
+      if (product.mineTime != null && product.level > 0) {
         product.mineable = product.enable;
       }
     }
@@ -621,7 +662,7 @@ Future<bool> addNewProduct(String name) async {
       enable: true,
       mineable: false,
       produceTime: null,
-      mineTime: null,
+      mineTime: 1,
       level: 0,
       icon: null,
       iconBlob: null

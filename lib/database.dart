@@ -1,6 +1,6 @@
 /*
   Train Station 2 Calculator - Simple resource calculator to play TrainStation2
-  Copyright (C) <year>  <name of author>
+  Copyright © 2024 SoleilPQD
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -211,6 +212,45 @@ class MaterialDatabase {
   Future<List<Product>> loadAllProducts() async {
     List<Map<String, Object?>> listRaw = await _db!.query("product", orderBy: "level ASC, name ASC");
     return listRaw.map((item) => _remapProduct(item)).toList();
+  }
+
+  Future<bool> enableByLevel(int level) async {
+    try {
+    final Database db = _db!;
+    await db.rawUpdate("""
+UPDATE resource
+SET enable = 1
+WHERE level <= ?
+""", [level]);
+    await db.rawUpdate("""
+UPDATE resource
+SET enable = 0
+WHERE level > ?
+""", [level]);
+    await db.rawUpdate("""
+UPDATE product
+SET enable = 1
+WHERE level <= ?
+""", [level]);
+    await db.rawUpdate("""
+UPDATE product
+SET enable = 0
+WHERE level > ?
+""", [level]);
+      await db.rawUpdate("""
+UPDATE product
+SET mineable = 1
+WHERE level <= ? AND level > 0 AND mine_time IS NOT NULL
+""", [level]);
+    await db.rawUpdate("""
+UPDATE product
+SET mineable = 0
+WHERE level > ? AND level > 0 AND mine_time IS NOT NULL
+""", [level]);
+      return true;
+    } on Exception {
+      return false;
+    }
   }
 
   String _buildArrayQuery(int length) {
