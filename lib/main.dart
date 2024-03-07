@@ -144,7 +144,10 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(wgBuildCtx).colorScheme.primary,
-        title: Text(widget.title),
+        title: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Text(widget.title),
+        ),
         actions: [
           IconButton(
             onPressed: _allFold,
