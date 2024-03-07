@@ -102,6 +102,7 @@ class MaterialDatabase {
   }
 
   Future<void> resetDatabase({Database? database}) async {
+    final db = database ?? _db!;
     try {
       String json = await rootBundle.loadString("assets/materials.json");
       final data = jsonDecode(json) as Map<String, dynamic>;
@@ -111,7 +112,6 @@ class MaterialDatabase {
       List<Resource> resources = resourcesData.map((item) => Resource.fromJson(item)).toList();
       List<Product> products = productsData.map((item) => Product.fromJson(item)).toList();
       List<ProductMaterial> materials = materialsData.map((item) => ProductMaterial.fromJson(item)).toList();
-      final db = database ?? _db!;
       await db.delete("resource")
         .then((value) => db.delete("product"))
         .then((value) => db.delete("material"))
