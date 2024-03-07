@@ -150,6 +150,7 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   void _addMaterialOnTap() {
+    // TODO: exclude to avoid cycle
     List<String> resourceNames = [];
     List<String> productNames = [widget.product.name];
     for (ProductMaterial material in _dataController.materials) {

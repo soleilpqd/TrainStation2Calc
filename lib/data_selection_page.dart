@@ -36,8 +36,8 @@ class DataSelectionPage extends StatefulWidget {
 
 class _DataSelectionPageState extends State<DataSelectionPage> {
 
-  List<Resource> _resources = [];
-  List<Product> _products = [];
+  final List<Resource> _resources = [];
+  final List<Product> _products = [];
   List<Resource> _allResources = [];
   List<Product> _allProducts = [];
   String _filter = "";

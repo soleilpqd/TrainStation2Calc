@@ -266,7 +266,7 @@ WHERE level > ? AND level > 0 AND mine_time IS NOT NULL
     return result;
   }
 
-  String _buildWhereStatement(List<String>? excluded, List<String>? included, bool enable, List<String> whereArgs) {
+  String? _buildWhereStatement(List<String>? excluded, List<String>? included, bool enable, List<String> whereArgs) {
     String whereStatment = enable ? "enable > 0" : "";
     if (excluded != null && excluded.isNotEmpty) {
       if (whereStatment.isNotEmpty) {
@@ -282,19 +282,20 @@ WHERE level > ? AND level > 0 AND mine_time IS NOT NULL
       whereStatment += "name IN ${_buildArrayQuery(included.length)}";
       whereArgs.addAll(included);
     }
+    if (whereStatment.isEmpty) return null;
     return whereStatment;
   }
 
   Future<List<Resource>> loadEnableResources({List<String>? excluded, List<String>? included, bool enable = true}) async {
     List<String> whereArgs = [];
-    String whereStatment = _buildWhereStatement(excluded, included, enable, whereArgs);
+    String? whereStatment = _buildWhereStatement(excluded, included, enable, whereArgs);
     List<Map<String, Object?>> listRaw = await _db!.query("resource", where: whereStatment, whereArgs: whereArgs, orderBy: "level ASC, name ASC");
     return listRaw.map((item) => _remapResource(item)).toList();
   }
 
   Future<List<Product>> loadEnableProducts({List<String>? excluded, List<String>? included, bool enable = true}) async {
     List<String> whereArgs = [];
-    String whereStatment = _buildWhereStatement(excluded, included, enable, whereArgs);
+    String? whereStatment = _buildWhereStatement(excluded, included, enable, whereArgs);
     List<Map<String, Object?>> listRaw = await _db!.query("product", where: whereStatment, whereArgs: whereArgs, orderBy: "level ASC, name ASC");
     return listRaw.map((item) => _remapProduct(item)).toList();
   }
