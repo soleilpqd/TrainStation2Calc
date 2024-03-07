@@ -27,8 +27,9 @@ class DataSelectionPage extends StatefulWidget {
   final Function(Resource?, Product?) completion;
   final List<String> excludedResources;
   final List<String> excludedProducts;
+  final bool isEnableOnly;
 
-  const DataSelectionPage({super.key, required this.completion, required this.excludedResources, required this.excludedProducts});
+  const DataSelectionPage({super.key, required this.completion, required this.excludedResources, required this.excludedProducts, this.isEnableOnly = true});
 
   @override
   State<StatefulWidget> createState() => _DataSelectionPageState();
@@ -47,8 +48,8 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
 
   Future<void> _loadData() async {
     final db = MaterialDatabase();
-    resources = await db.loadEnableResources(excluded: widget.excludedResources);
-    products = await db.loadEnableProducts(excluded: widget.excludedProducts);
+    resources = await db.loadEnableResources(excluded: widget.excludedResources, enable: widget.isEnableOnly);
+    products = await db.loadEnableProducts(excluded: widget.excludedProducts, enable: widget.isEnableOnly);
   }
 
   @override

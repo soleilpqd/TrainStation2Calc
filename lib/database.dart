@@ -412,4 +412,34 @@ WHERE product.enable > 0 OR resource.enable > 0
     }
   }
 
+  String _buildMaterialWhere(bool isResource) => "product == ? AND material == ? AND is_resource ${isResource ? ">" : "=="} 0";
+
+  Future<bool> updateMaterial(ProductMaterial material) async {
+    final Database db = _db!;
+    try {
+      await db.update(
+        "material", _mapMaterial(material),
+        where: _buildMaterialWhere(material.isResource),
+        whereArgs: [material.product, material.material]
+      );
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  Future<bool> delteMaterial(ProductMaterial material) async {
+    final Database db = _db!;
+    try {
+      await db.delete(
+        "material",
+        where: _buildMaterialWhere(material.isResource),
+        whereArgs: [material.product, material.material]
+      );
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
 }
