@@ -18,7 +18,6 @@
 
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,6 +27,8 @@ import 'package:train_station_2_calc/data_selection_page.dart';
 import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:train_station_2_calc/webview_page.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -166,7 +167,11 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
               _shouldReloadData = true;
               Navigator.push(wgBuildCtx, MaterialPageRoute(builder: (_) => const DatabasePage()));
             }
-          )
+          ),
+          IconButton(
+            onPressed: _helpOnTap,
+            icon: const Icon(Icons.help_outline)
+          ),
         ],
       ),
       body: ListView(
@@ -360,6 +365,14 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
 
   void _calculate() async {
     _dataController.calculate().then((value) => setState(() {}));
+  }
+
+  void _helpOnTap() {
+    if (Platform.isAndroid || Platform.isIOS) {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const WebViewPage()));
+    } else {
+      launchUrlString("https://github.com/soleilpqd/TrainStation2Calc/blob/develop/DOCS/end_user_manual.md");
+    }
   }
 
 }
