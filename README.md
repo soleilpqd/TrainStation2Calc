@@ -1,5 +1,7 @@
 # TrainStation2Calc
 
-Simple resource calculator to play TrainStation2
+Simple resources calculator to play TrainStation2.
 
-This is my practice for Flutter and also a tool for my game.
+This is my Flutter practice and also a personal tool to play TrainStation2.
+
+Data and icons origin: [trainstation-2-players-guide.fandom.com](https://trainstation-2-players-guide.fandom.com/wiki/Factories).
