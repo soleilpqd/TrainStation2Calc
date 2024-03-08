@@ -149,18 +149,12 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  void _addMaterialOnTap() {
-    // TODO: exclude to avoid cycle
+  void _addMaterialOnTap() async {
     List<String> resourceNames = [];
-    List<String> productNames = [widget.product.name];
-    for (ProductMaterial material in _dataController.materials) {
-      if (material.isResource) {
-        resourceNames.add(material.material);
-      } else {
-        productNames.add(material.material);
-      }
-    }
+    List<String> productNames = [];
+    await _dataController.buildExcludedList(resourceNames, productNames);
     showDialog(
+      // ignore: use_build_context_synchronously
       context: context,
       builder: (_) => DataSelectionPage(
         excludedResources: resourceNames,
@@ -241,6 +235,23 @@ class _ProductPageDataController {
       List<Product> products = await db.loadEnableProducts(included: productNames, enable: false);
       for (Product product in products) {
         productCache[product.name] = product;
+      }
+    }
+  }
+
+  Future<void> buildExcludedList(List<String> resourceNames, List<String> productNames) async {
+    productNames.add(_productName);
+    for (ProductMaterial material in materials) {
+      if (material.isResource) {
+        resourceNames.add(material.material);
+      } else {
+        productNames.add(material.material);
+      }
+    }
+    List<ProductMaterial> dependencies = await MaterialDatabase().loadMaterialsForResources([_productName], null);
+    for (ProductMaterial material in dependencies) {
+      if (!material.isResource && !productNames.contains(material.product)) {
+        productNames.add(material.product);
       }
     }
   }

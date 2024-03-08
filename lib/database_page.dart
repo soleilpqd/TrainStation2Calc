@@ -66,32 +66,44 @@ class _DatabasePageState extends State<DatabasePage> {
           )
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(8),
-        children: [
-          Table(
-            border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const <int, TableColumnWidth>{
-              0: FixedColumnWidth(80),
-              1: FlexColumnWidth(),
-              2: FixedColumnWidth(60),
-              3: FixedColumnWidth(40),
-              4: FixedColumnWidth(40)
-            },
-            children: List<TableRow>.generate(numOfRows, (index) {
-              final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
-              if (tableIndex.row == null) {
-                return _makeSectionRow(tableIndex.section);
-              }
-              if (tableIndex.section == 0) {
-                return _makeResourceRow(tableIndex.row!);
-              }
-              return _makeProductRow(tableIndex.row!);
-            }),
-          ),
-        ],
-      )
+      body: Column(children: [
+        Row(children: [
+          const SizedBox(width: 8),
+          Expanded(child: TextField(
+            autofocus: false,
+            decoration: const InputDecoration(labelText: "Filter by name"),
+            onChanged: _filterTextOnChange,
+          )),
+          const SizedBox(width: 8)
+        ]),
+        Expanded(child: ListView(
+          padding: const EdgeInsets.all(8),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            Table(
+              border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              columnWidths: const <int, TableColumnWidth>{
+                0: FixedColumnWidth(80),
+                1: FlexColumnWidth(),
+                2: FixedColumnWidth(60),
+                3: FixedColumnWidth(40),
+                4: FixedColumnWidth(40)
+              },
+              children: List<TableRow>.generate(numOfRows, (index) {
+                final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
+                if (tableIndex.row == null) {
+                  return _makeSectionRow(tableIndex.section);
+                }
+                if (tableIndex.section == 0) {
+                  return _makeResourceRow(tableIndex.row!);
+                }
+                return _makeProductRow(tableIndex.row!);
+              }),
+            ),
+          ],
+        ))
+      ])
     );
   }
 
@@ -279,8 +291,8 @@ class _DatabasePageState extends State<DatabasePage> {
       if (await _dataController.addNewResource(text)) {
         setState(() {});
       } else if (text.isNotEmpty) {
-        // ignore: use_build_context_synchronously
         showRetry(
+          // ignore: use_build_context_synchronously
           context,
           "Fail to create mineral with name '$text'",
           "Please input a different name",
@@ -303,8 +315,8 @@ class _DatabasePageState extends State<DatabasePage> {
       if (await _dataController.addNewProduct(text)) {
         setState(() {});
       } else if (text.isNotEmpty) {
-        // ignore: use_build_context_synchronously
         showRetry(
+          // ignore: use_build_context_synchronously
           context,
           "Fail to create product with name '$text'",
           "Please input a different name",
@@ -395,6 +407,7 @@ class _DatabasePageState extends State<DatabasePage> {
     try {
       XFile? file = await picker.pickImage(source: ImageSource.gallery, maxHeight: 50.0);
       if (file != null && context.mounted) {
+        // ignore: use_build_context_synchronously
         showLoading(context);
         Uint8List data = await file.readAsBytes();
         final cmd = img.Command()
@@ -406,8 +419,8 @@ class _DatabasePageState extends State<DatabasePage> {
       }
     } on Exception {
       closeLoading();
-      // ignore: use_build_context_synchronously
       showRetry(
+        // ignore: use_build_context_synchronously
         context,
         "Something wrong",
         "Fail to load given image. Please select a differenct one.",
@@ -429,17 +442,48 @@ class _DatabasePageState extends State<DatabasePage> {
     );
   }
 
+  void _filterTextOnChange(String value) {
+    _dataController.filter = value.trim().toLowerCase();
+    setState(() {
+      _dataController.doFilter();
+    });
+  }
+
 }
 
 class _DatabasePageDataController {
 
   List<Resource> resources = [];
   List<Product> products = [];
+  List<Resource> _allResources = [];
+  List<Product> _allProducts = [];
+  String filter = "";
 
   Future<void> loadData() async {
     final db = MaterialDatabase();
-    resources = await db.loadAllResources();
-    products = await db.loadAllProducts();
+    _allResources = await db.loadAllResources();
+    _allProducts = await db.loadAllProducts();
+    doFilter();
+  }
+
+  void doFilter() {
+    resources.clear();
+    products.clear();
+    if (filter.isEmpty) {
+      resources.addAll(_allResources);
+      products.addAll(_allProducts);
+    } else {
+      for (Resource resource in _allResources) {
+        if (resource.name.contains(filter)) {
+          resources.add(resource);
+        }
+      }
+      for (Product product in _allProducts) {
+        if (product.name.contains(filter)) {
+          products.add(product);
+        }
+      }
+    }
   }
 
   /// Return list of product names which require input product [name] to produce

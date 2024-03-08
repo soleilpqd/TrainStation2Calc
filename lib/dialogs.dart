@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 Future<void> inputNumberDialogBuilder(BuildContext context, String title, String initValue, Function(String) completion) {
-  TextEditingController controller = TextEditingController(text: initValue);
+  TextEditingController controller = TextEditingController(text: initValue == "0" ? "" : initValue);
   return showDialog<void>(
     context: context,
     builder: (dlgCtx) {

@@ -64,14 +64,19 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
         title: const Text("Data selection")
       ),
       body: Column(children: [
+        Row(children: [
+          const SizedBox(width: 8),
+          Expanded(child: TextField(
+            autofocus: false,
+            decoration: const InputDecoration(labelText: "Filter by name"),
+            onChanged: _filterTextOnChange,
+          )),
+          const SizedBox(width: 8)
+        ]),
         Expanded(child: ListView(
           padding: const EdgeInsets.all(8),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
-            TextField(
-              autofocus: false,
-              decoration: const InputDecoration(labelText: "Filter by name"),
-              onChanged: _filterTextOnChange,
-            ),
             Table(
               border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
               defaultVerticalAlignment: TableCellVerticalAlignment.middle,

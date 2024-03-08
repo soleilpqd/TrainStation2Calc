@@ -16,6 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -30,7 +31,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  if (Platform.isLinux) {
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(const MyApp());
 }
 
