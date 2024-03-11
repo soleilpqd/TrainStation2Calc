@@ -18,6 +18,7 @@
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:train_station_2_calc/data_history.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/models.dart';
 
@@ -36,10 +37,10 @@ class DataSelectionPage extends StatefulWidget {
 
 class _DataSelectionPageState extends State<DataSelectionPage> {
 
-  final List<Resource> _resources = [];
-  final List<Product> _products = [];
+  final List<String> _items = [];
   List<Resource> _allResources = [];
   List<Product> _allProducts = [];
+  final DataHistory _history = DataHistory();
   String _filter = "";
 
   @override
@@ -52,12 +53,12 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
     final db = MaterialDatabase();
     _allResources = await db.loadEnableResources(excluded: widget.excludedResources, enable: widget.isEnableOnly);
     _allProducts = await db.loadEnableProducts(excluded: widget.excludedProducts, enable: widget.isEnableOnly);
+    await _history.loadData();
     _doFilter();
   }
 
   @override
   Widget build(BuildContext context) {
-    final numOfRows = _resources.length + _products.length;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -84,18 +85,17 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
                 0: FixedColumnWidth(80),
                 1: FlexColumnWidth()
               },
-              children: List<TableRow>.generate(numOfRows, (index) {
-                String name = "";
+              children: List<TableRow>.generate(_items.length, (index) {
+                String item = _items[index];
+                String name = DataHistory.nameFromHistoryItem(item);
                 String? icon;
                 Uint8List? blob;
-                if (index >= _resources.length) {
-                  Product product = _products[index - _resources.length];
-                  name = product.name;
+                if (item.startsWith(DataHistory.productPrefix)) {
+                  Product product = _allProducts.firstWhere((element) => element.name == name);
                   icon = product.icon;
                   blob = product.iconBlob;
-                } else {
-                  Resource resource = _resources[index];
-                  name = resource.name;
+                } else if (item.startsWith(DataHistory.resourcePrefix)) {
+                  Resource resource = _allResources.firstWhere((element) => element.name == name);
                   icon = resource.icon;
                   blob = resource.iconBlob;
                 }
@@ -132,11 +132,14 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
 
   void _rowOnSelection(int index) {
     Navigator.of(context).pop();
-    if (index >= _resources.length) {
-      Product product = _products[index - _resources.length];
+    String item = _items[index];
+    String name = DataHistory.nameFromHistoryItem(item);
+    _history.addItem(item);
+    if (item.startsWith(DataHistory.productPrefix)) {
+      Product product = _allProducts.firstWhere((element) => element.name == name);
       widget.completion(null, product);
-    } else {
-      Resource resource = _resources[index];
+    } else if (item.startsWith(DataHistory.resourcePrefix)) {
+      Resource resource = _allResources.firstWhere((element) => element.name == name);
       widget.completion(resource, null);
     }
   }
@@ -149,21 +152,39 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
   }
 
   void _doFilter() {
-    _resources.clear();
-    _products.clear();
-    if (_filter.isEmpty) {
-      _resources.addAll(_allResources);
-      _products.addAll(_allProducts);
-    } else {
-      for (Resource resource in _allResources) {
-        if (resource.name.contains(_filter)) {
-          _resources.add(resource);
+    _items.clear();
+    final List<Resource> tempResources = [];
+    tempResources.addAll(_allResources);
+    final List<Product> tempProducts = [];
+    tempProducts.addAll(_allProducts);
+
+    for (String item in _history.items) {
+      final String name = item.substring(2);
+      final bool isValid = (_filter.isNotEmpty && name.contains(_filter)) || _filter.isEmpty;
+      if (isValid) {
+        if (item.startsWith(DataHistory.resourcePrefix)) {
+          final int index = tempResources.indexWhere((element) => element.name == name);
+          if (index >= 0) {
+            _items.add(item);
+            tempResources.removeAt(index);
+          }
+        } else if (item.startsWith(DataHistory.productPrefix)) {
+          final int index = tempProducts.indexWhere((element) => element.name == name);
+          if (index >= 0) {
+            _items.add(item);
+            tempProducts.removeAt(index);
+          }
         }
       }
-      for (Product product in _allProducts) {
-        if (product.name.contains(_filter)) {
-          _products.add(product);
-        }
+    }
+    for (Resource resource in tempResources) {
+      if (_filter.isEmpty || (_filter.isNotEmpty && resource.name.contains(_filter))) {
+        _items.add("${DataHistory.resourcePrefix}${resource.name}");
+      }
+    }
+    for (Product product in tempProducts) {
+      if (_filter.isEmpty || (_filter.isNotEmpty && product.name.contains(_filter))) {
+        _items.add("${DataHistory.productPrefix}${product.name}");
       }
     }
   }

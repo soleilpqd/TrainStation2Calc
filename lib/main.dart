@@ -21,6 +21,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:train_station_2_calc/data_history.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/database_page.dart';
 import 'package:train_station_2_calc/data_selection_page.dart';
@@ -385,6 +386,7 @@ class _MyHomePageDataController {
 
   final Map<String, Resource> _cacheResources = {};
   final Map<String, Product> _cacheProducts = {};
+  final DataHistory _history = DataHistory();
 
   void cacheResource(Resource resource) => _cacheResources[resource.name] = resource;
   void cacheProduct(Product product) => _cacheProducts[product.name] = product;
@@ -415,6 +417,7 @@ class _MyHomePageDataController {
 
   Future<void> loadData() async {
     clear();
+    await _history.loadData();
     MaterialDatabase db = MaterialDatabase();
     List<ProductionJob> jobs = await db.loadJobs();
     List<String> resNames = [];
@@ -448,6 +451,7 @@ class _MyHomePageDataController {
     }
     _cacheResources.clear();
     _cacheProducts.clear();
+    _history.clear();
   }
 
   Future<void> save() async {
@@ -565,6 +569,13 @@ class _MyHomePageDataController {
       }
     }
     target.addAll(temp2);
+    for (ProductionJob job in target) {
+      if (job.isResource) {
+        _history.addItemSecondary("${DataHistory.resourcePrefix}${job.material}");
+      } else {
+        _history.addItemSecondary("${DataHistory.productPrefix}${job.material}");
+      }
+    }
   }
 
 }

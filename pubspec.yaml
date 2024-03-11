@@ -43,6 +43,7 @@ dependencies:
   webview_flutter: any
   # url_launcher: any
   flutter_markdown: any
+  shared_preferences: any
 
 dev_dependencies:
   # flutter_test:
