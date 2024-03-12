@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/dialogs.dart';
+import 'package:train_station_2_calc/main.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
@@ -33,15 +34,32 @@ class DatabasePage extends StatefulWidget {
   State<StatefulWidget> createState() => _DatabasePageState();
 }
 
-class _DatabasePageState extends State<DatabasePage> {
+class _DatabasePageState extends State<DatabasePage> with RouteAware {
 
   final _DatabasePageDataController _dataController = _DatabasePageDataController();
   final NumberFormat _numberFormat = NumberFormat("#,###", "en_US");
+  bool _shouldReloadData = false;
 
   @override
   void initState() {
     super.initState();
     _dataController.loadData().then((value) => setState(() {}));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    if (_shouldReloadData) {
+      _shouldReloadData = false;
+      // _dataController.loadData().then((value) => setState(() {}));
+      setState(() {});
+    }
   }
 
   @override
@@ -62,7 +80,7 @@ class _DatabasePageState extends State<DatabasePage> {
           ),
           TextButton(
             onPressed: _enableByLevelOnTap,
-            child: const Text("Enable by level", style: TextStyle(color: Colors.white),)
+            child: const Text("Enable\nby level", textAlign: TextAlign.center, style: TextStyle(color: Colors.white),)
           )
         ],
       ),
@@ -77,7 +95,6 @@ class _DatabasePageState extends State<DatabasePage> {
           const SizedBox(width: 8)
         ]),
         Expanded(child: ListView(
-          padding: const EdgeInsets.all(8),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             Table(
@@ -86,9 +103,8 @@ class _DatabasePageState extends State<DatabasePage> {
               columnWidths: const <int, TableColumnWidth>{
                 0: FixedColumnWidth(80),
                 1: FlexColumnWidth(),
-                2: FixedColumnWidth(60),
-                3: FixedColumnWidth(40),
-                4: FixedColumnWidth(40)
+                2: FixedColumnWidth(40),
+                3: FixedColumnWidth(40)
               },
               children: List<TableRow>.generate(numOfRows, (index) {
                 final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
@@ -125,9 +141,6 @@ class _DatabasePageState extends State<DatabasePage> {
         ),
         section == 0 ?
           Container() :
-          const Text("Amount", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
-        section == 0 ?
-          Container() :
           const Text("Minable", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
         const Text("Enable", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
       ]
@@ -144,7 +157,6 @@ class _DatabasePageState extends State<DatabasePage> {
         ),
         Text(resource.name, textAlign: TextAlign.left, style: const TextStyle(color: Colors.white)),
         Container(),
-        Container(),
         resource.level == 0 ?
           IconButton(
             onPressed: () => _removeResourceOnTap(index),
@@ -160,37 +172,27 @@ class _DatabasePageState extends State<DatabasePage> {
 
   TableRow _makeProductRow(int index) {
     final product = _dataController.products[index];
-    final bool isProductMineable = product.mineTime != null && product.mineTime! > 0;
+    String title = product.name;
+    if (!(product.isRegionFactoryAvailabe && product.mineable)) {
+      title += " (${_numberFormat.format(product.amount)} units / ${DurationComponents.init(product.produceTime ?? 0).formatedString})";
+    }
     return TableRow(
       children: [
         IconButton(
           onPressed: () => _iconProductOnTap(index),
           icon: loadIcon(product.icon, product.iconBlob)
         ),
-        isProductMineable && product.mineable ?
-          Text(product.name, style: const TextStyle(color: Colors.white)) :
-          TextButton(
-            onPressed: () => _productRowOnSelection(index),
-            style: ButtonStyle(
-              padding: MaterialStateProperty.all(EdgeInsets.zero),
-              alignment: Alignment.centerLeft,
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              overlayColor: MaterialStateProperty.all(Colors.transparent),
-            ),
-            child: Text(product.name, style: const TextStyle(fontWeight: FontWeight.normal)),
+        TextButton(
+          onPressed: () => _productRowOnSelection(index),
+          style: ButtonStyle(
+            padding: MaterialStateProperty.all(EdgeInsets.zero),
+            alignment: Alignment.centerLeft,
+            foregroundColor: MaterialStateProperty.all(Colors.white),
+            overlayColor: MaterialStateProperty.all(Colors.transparent),
           ),
-        isProductMineable && product.mineable ?
-          Container() :
-          TextButton(
-            onPressed: () => _productProductionAmountOnTap(index),
-            style: ButtonStyle(
-              alignment: Alignment.center,
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              // overlayColor: MaterialStateProperty.all(Colors.transparent),
-            ),
-            child: Text(_numberFormat.format(product.amount), style: const TextStyle(fontWeight: FontWeight.normal)),
-          ),
-        isProductMineable ?
+          child: Text(title, style: const TextStyle(fontWeight: FontWeight.normal)),
+        ),
+        product.isRegionFactoryAvailabe ?
           Checkbox(
             value: product.mineable,
             onChanged: (newValue) => _mineableEnableOnChange(index, newValue ?? false)
@@ -240,6 +242,7 @@ class _DatabasePageState extends State<DatabasePage> {
 
   void _productRowOnSelection(int index) {
     final Product product = _dataController.products[index];
+    _shouldReloadData =  true;
     Navigator.push(context, MaterialPageRoute(builder: (_) => ProductPage(product: product)));
   }
 
@@ -427,19 +430,6 @@ class _DatabasePageState extends State<DatabasePage> {
         () => _pickImage(completion)
       );
     }
-  }
-
-  void _productProductionAmountOnTap(int index) {
-    final Product product = _dataController.products[index];
-    inputNumberDialogBuilder(
-      context,
-      "Amount of '${product.name}' per each production",
-      "${product.amount}",
-      (value) {
-        _dataController.updateProductProductionAmount(index, int.parse(value))
-          .then((value) => setState(() {}));
-      }
-    );
   }
 
   void _filterTextOnChange(String value) {
@@ -630,13 +620,6 @@ class _DatabasePageDataController {
     await db.updateProduct(product);
   }
 
-  Future<void> updateProductProductionAmount(int index, int value) async {
-    final Product product = products[index];
-    product.amount = value;
-    MaterialDatabase db = MaterialDatabase();
-    await db.updateProduct(product);
-  }
-
   Future<void> updateResourceIcon(int index, Uint8List? value) async {
     final Resource resource = resources[index];
     resource.iconBlob = value;
@@ -664,7 +647,7 @@ class _DatabasePageDataController {
 
     for (Product product in products) {
       product.enable = product.level <= level;
-      if (product.mineTime != null && product.level > 0) {
+      if (product.isRegionFactoryAvailabe && product.level > 0) {
         product.mineable = product.enable;
       }
     }
@@ -718,7 +701,7 @@ Future<bool> addNewProduct(String name) async {
       enable: true,
       mineable: false,
       produceTime: null,
-      mineTime: 1,
+      mineTime: null,
       level: 0,
       icon: null,
       iconBlob: null
@@ -737,6 +720,9 @@ Future<bool> addNewProduct(String name) async {
       return false;
     }
     if (!(await db.deleteProduct(product.name))) {
+      return false;
+    }
+    if (!(await db.deleteProductMaterials(product.name))) {
       return false;
     }
     products.removeAt(index);

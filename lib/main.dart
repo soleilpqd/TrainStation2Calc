@@ -29,7 +29,6 @@ import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/markdown_page.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:train_station_2_calc/webview_page.dart';
 // import 'package:url_launcher/url_launcher_string.dart';
 
 void main() {
@@ -177,7 +176,6 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(8),
         children: [
           Table(
             border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
@@ -209,6 +207,9 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
       "RESULT"
     ];
     final bool isFolded = _foldedSections.contains(section);
+    if (section == _HomePageSection.result && _dataController.productionTime > 0) {
+      titles[section.rawValue] = "RESULT (${DurationComponents.init(_dataController.productionTime).formatedString})";
+    }
     return TableRow(
       decoration: BoxDecoration(color: section.rawValue < _HomePageSection.result.rawValue ? Colors.white : Theme.of(context).colorScheme.primary),
       children: [
@@ -352,13 +353,44 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
 
   void _setAmount(_HomePageSection section, int index) {
     ProductionJob item = _dataController.items[section.rawValue][index];
+    String title = "";
+    if (section == _HomePageSection.input) {
+      title = "Input quantity for '${item.material}'";
+    } else {
+      title = "Inventory quantity for '${item.material}'";
+    }
+    String amount = "${item.amount}";
+    ProductionJob? inventoryJob;
+    if (section == _HomePageSection.result) {
+      for (ProductionJob job in _dataController.items[_HomePageSection.inventory.rawValue]) {
+        if (job.material == item.material && job.isResource == item.isResource) {
+          inventoryJob = job;
+          amount = "${job.amount}";
+          break;
+        }
+      }
+    }
     inputNumberDialogBuilder(
       context,
-      "Input quantity for '${item.material}'",
-      "${item.amount}",
+      title,
+      amount,
       (value) {
         int res = int.parse(value);
-        item.amount = res;
+        if (section == _HomePageSection.result) {
+          if (inventoryJob == null) {
+            if (item.isResource) {
+              Resource resource = _dataController.getResource(item.material)!;
+              _dataController.addResource(resource, _HomePageSection.inventory);
+            } else {
+              Product product = _dataController.getProduct(item.material)!;
+              _dataController.addProduct(product, _HomePageSection.inventory);
+            }
+            inventoryJob = _dataController.items[_HomePageSection.inventory.rawValue][_dataController.items[_HomePageSection.inventory.rawValue].length - 1];
+          }
+          inventoryJob?.amount = res;
+        } else {
+          item.amount = res;
+        }
         _dataController.save();
         _calculate();
       }
@@ -370,12 +402,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
   }
 
   void _helpOnTap() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const WebViewPage()));
-    } else {
-      // launchUrlString("https://github.com/soleilpqd/TrainStation2Calc/blob/develop/DOCS/end_user_manual.md");
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const MarkdownPage()));
-    }
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const MarkdownPage()));
   }
 
 }
@@ -387,6 +414,7 @@ class _MyHomePageDataController {
   final Map<String, Resource> _cacheResources = {};
   final Map<String, Product> _cacheProducts = {};
   final DataHistory _history = DataHistory();
+  int productionTime = 0;
 
   void cacheResource(Resource resource) => _cacheResources[resource.name] = resource;
   void cacheProduct(Product product) => _cacheProducts[product.name] = product;
@@ -452,6 +480,7 @@ class _MyHomePageDataController {
     _cacheResources.clear();
     _cacheProducts.clear();
     _history.clear();
+    productionTime = 0;
   }
 
   Future<void> save() async {
@@ -569,11 +598,16 @@ class _MyHomePageDataController {
       }
     }
     target.addAll(temp2);
+    productionTime = 0;
     for (ProductionJob job in target) {
       if (job.isResource) {
         _history.addItemSecondary("${DataHistory.resourcePrefix}${job.material}");
       } else {
         _history.addItemSecondary("${DataHistory.productPrefix}${job.material}");
+        Product product = getProduct(job.material)!;
+        if (!product.mineable && product.produceTime != null) {
+          productionTime += (job.amount ~/ product.amount) * product.produceTime!;
+        }
       }
     }
   }

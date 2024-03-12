@@ -403,6 +403,16 @@ WHERE product.enable > 0 OR resource.enable > 0
     }
   }
 
+  Future<bool> deleteProductMaterials(String name) async {
+    final Database db = _db!;
+    try {
+      await db.delete("material", where: "product == ?", whereArgs: [name]);
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
   Future<bool> insertMaterial(ProductMaterial material) async {
     final Database db = _db!;
     try {

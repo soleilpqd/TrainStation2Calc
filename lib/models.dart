@@ -17,7 +17,6 @@
  */
 
 import 'dart:typed_data';
-
 import 'package:flutter/widgets.dart';
 
 final Image _defaultIcon = Image.asset("assets/icons/Icon_404.png", width: 50, height: 50);
@@ -30,6 +29,41 @@ Image loadIcon(String? name, Uint8List? blob) {
     return Image.asset("assets/icons/$name", width: 50, height: 50, errorBuilder: (context, error, stackTrace) => _defaultIcon);
   }
   return _defaultIcon;
+}
+
+class DurationComponents {
+  final int hours;
+  final int minutes;
+  final int seconds;
+
+  DurationComponents({required this.hours, required this.minutes, required this.seconds});
+  DurationComponents.fromList(List<int> values): this(hours: values[0], minutes: values[1], seconds: values[2]);
+
+  static DurationComponents init(int duration) {
+    int seconds = duration;
+    int hours = seconds ~/ 3600;
+    seconds -= hours * 3600;
+    int minutes = seconds ~/ 60;
+    seconds -= minutes * 60;
+    return DurationComponents(hours: hours, minutes: minutes, seconds: seconds);
+  }
+
+  String get formatedString {
+    String result = "";
+    if (hours > 0) {
+      result = "${hours}h";
+    }
+    if (minutes > 0) {
+      result += "${minutes}m";
+    }
+    if (seconds > 0) {
+      result += "${seconds}s";
+    }
+    return result;
+  }
+  int get duration => hours * 3600 + minutes * 60 + seconds;
+  List<int> get toList => [hours, minutes, seconds];
+
 }
 
 class TableIndex {
@@ -110,6 +144,12 @@ class Product {
   int level;
   String? icon;
   Uint8List? iconBlob;
+
+  // Patch for model design
+  bool get isRegionFactoryAvailabe => mineTime != null && mineTime! > 0;
+  set isRegionFactoryAvailabe(bool value) {
+    mineTime = value ? 1 : null;
+  }
 
   Product({
     required this.name,

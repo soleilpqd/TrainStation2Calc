@@ -19,6 +19,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_picker/flutter_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:train_station_2_calc/data_selection_page.dart';
 import 'package:train_station_2_calc/database.dart';
@@ -36,6 +37,14 @@ class ProductPage extends StatefulWidget {
 
 }
 
+enum _FirstSectionRow {
+  enability,
+  regionFactory,
+  mineable,
+  quantity,
+  duration
+}
+
 class _ProductPageState extends State<ProductPage> {
 
   final _ProductPageDataController _dataController = _ProductPageDataController();
@@ -44,12 +53,28 @@ class _ProductPageState extends State<ProductPage> {
   @override
   void initState() {
     super.initState();
-    _dataController.loadData(widget.product.name).then((value) => setState(() {}));
+    _dataController.loadData(widget.product).then((value) => setState(() {}));
   }
 
   @override
   Widget build(BuildContext wgBuildCtx) {
-    final int numOfRows = _dataController.materials.length;
+    List<_FirstSectionRow> firstSectionRows = [];
+    if (widget.product.level > 0) {
+      firstSectionRows.add(_FirstSectionRow.enability);
+    }
+    firstSectionRows.add(_FirstSectionRow.regionFactory);
+    if (widget.product.isRegionFactoryAvailabe) {
+      firstSectionRows.add(_FirstSectionRow.mineable);
+      if (!widget.product.mineable) {
+        firstSectionRows.add(_FirstSectionRow.quantity);
+        firstSectionRows.add(_FirstSectionRow.duration);
+      }
+    } else {
+      firstSectionRows.add(_FirstSectionRow.quantity);
+      firstSectionRows.add(_FirstSectionRow.duration);
+    }
+    List<int> lengths = [firstSectionRows.length, _dataController.materials.length];
+    final int numOfRows = TableIndex.getNumberOrRows(lengths);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(wgBuildCtx).colorScheme.primary,
@@ -60,93 +85,148 @@ class _ProductPageState extends State<ProductPage> {
             const SizedBox(width: 10),
             Text(widget.product.name.toUpperCase())
           ]
-        )
-      ),
-      body: Column(children: [
-        Container(
-          color: Colors.white,
-          height: 50,
-          child: Row(
-            children: [
-              SizedBox(
-                width: 50,
-                child: IconButton(
-                  icon: Icon(Icons.add_circle, color: Theme.of(wgBuildCtx).colorScheme.primary),
-                  iconSize: 32,
-                  onPressed: _addMaterialOnTap,
-                ),
-              ),
-              const Text("MATERIALS", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              Expanded(child: Container()),
-              const SizedBox(
-                width: 40,
-                child: Text("Amount", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
-              ),
-              Container(width: 60)
-            ]
-          )
         ),
-        Expanded(child: ListView(
-          padding: const EdgeInsets.all(8),
-          children: [
-            Table(
-              border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              columnWidths: const <int, TableColumnWidth>{
-                0: FixedColumnWidth(80),
-                1: FlexColumnWidth(),
-                2: FixedColumnWidth(60),
-                3: FixedColumnWidth(40),
-              },
-              children: List<TableRow>.generate(numOfRows, (index) {
-                final ProductMaterial material = _dataController.materials[index];
-                String? icon;
-                Uint8List? iconBlob;
-                if (material.isResource) {
-                  final Resource resource = _dataController.resourceCache[material.material]!;
-                  icon = resource.icon;
-                  iconBlob = resource.iconBlob;
-                } else {
-                  final Product product = _dataController.productCache[material.material]!;
-                  icon = product.icon;
-                  iconBlob = product.iconBlob;
-                }
-                return TableRow(children: [
-                  IconButton(
-                    onPressed: () => _amoutOnTap(index),
-                    icon: loadIcon(icon, iconBlob),
-                    style: ButtonStyle(overlayColor: MaterialStateProperty.all(Colors.transparent)),
-                  ),
-                  TextButton(
-                    onPressed: () => _amoutOnTap(index),
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all(EdgeInsets.zero),
-                      alignment: Alignment.centerLeft,
-                      foregroundColor: MaterialStateProperty.all(Colors.white),
-                      overlayColor: MaterialStateProperty.all(Colors.transparent),
-                    ),
-                    child: Text(material.material, style: const TextStyle(fontWeight: FontWeight.normal)),
-                  ),
-                  TextButton(
-                    onPressed: () => _amoutOnTap(index),
-                    style: ButtonStyle(
-                      alignment: Alignment.center,
-                      foregroundColor: MaterialStateProperty.all(Colors.white),
-                      overlayColor: MaterialStateProperty.all(Colors.transparent),
-                    ),
-                    child: Text(_numberFormat.format(material.amount), style: const TextStyle(fontWeight: FontWeight.normal)),
-                  ),
-                  IconButton(
-                    onPressed: () => _removeItemOnTap(index),
-                    icon: const Icon(Icons.delete, color: Colors.red)
-                  )
-                ]);
-              }),
-            ),
-          ],
-        ))
-      ])
+      ),
+      body: ListView(
+        children: [
+          Table(
+            border: const TableBorder(horizontalInside: BorderSide(color: Colors.grey, width: 0.5)),
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: const <int, TableColumnWidth>{
+              0: FlexColumnWidth()
+            },
+            children: List<TableRow>.generate(numOfRows, (index) {
+              final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
+              if (tableIndex.row == null) {
+                return _makeSectionHeader(tableIndex.section);
+              }
+              if (tableIndex.section == 0) {
+                return _makeInfoCell(tableIndex.row!, firstSectionRows);
+              }
+              return _makeMaterialCell(tableIndex.row!);
+            }),
+          ),
+        ],
+      )
     );
+  }
+
+  TableRow _makeSectionHeader(int section) {
+    List<Widget> content = [];
+    if (section == 0) {
+      content = [
+        const SizedBox(width: 8, height: 48),
+        const Text("GENERAL", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold))
+      ];
+    } else {
+      content = [
+        SizedBox(
+          width: 50,
+          child: IconButton(
+            icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
+            iconSize: 32,
+            onPressed: _addMaterialOnTap,
+          ),
+        ),
+        const Text("MATERIALS", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        Expanded(child: Container()),
+        const SizedBox(
+          width: 40,
+          child: Text("Amount", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 10)),
+        ),
+        Container(width: 60)
+      ];
+    }
+    return TableRow(
+      decoration: const BoxDecoration(color: Colors.white),
+      children: [Row(children: content)]
+    );
+  }
+
+  TableRow _makeInfoCell(int index, List<_FirstSectionRow> rows) {
+    String title = "";
+    late Widget content;
+    switch (rows[index]) {
+      case _FirstSectionRow.enability:
+        title = "Enable";
+        content = Checkbox(value: widget.product.enable, onChanged: _enableOnChange);
+      case _FirstSectionRow.regionFactory:
+        title = "Region factory available";
+        content = Checkbox(value: widget.product.isRegionFactoryAvailabe, onChanged: _regionFactoryOnChange);
+      case _FirstSectionRow.mineable:
+        title = "Region factory unlocked";
+        content = Checkbox(value: widget.product.mineable, onChanged: _mineableOnChange);
+      case _FirstSectionRow.quantity:
+        title = "Production quantity";
+        content = TextButton(
+        style: ButtonStyle(
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+          overlayColor: MaterialStateProperty.all(Colors.transparent),
+        ),
+        onPressed: _productionAmoutOnTap,
+        child: Text(_numberFormat.format(widget.product.amount))
+      );
+      case _FirstSectionRow.duration:
+        title = "Production duration";
+        content = TextButton(
+          style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all(Colors.white),
+            overlayColor: MaterialStateProperty.all(Colors.transparent),
+          ),
+          onPressed: _productionDurationOnTap,
+          child: Text(DurationComponents.init(widget.product.produceTime ?? 0).formatedString)
+        );
+    }
+    return TableRow(children: [Row(children: [
+      Expanded(child: Text(title, textAlign: TextAlign.right)),
+      const SizedBox(width: 8),
+      SizedBox(width: 120, child: content)
+    ])]);
+  }
+
+  TableRow _makeMaterialCell(int index) {
+    final ProductMaterial material = _dataController.materials[index];
+    String? icon;
+    Uint8List? iconBlob;
+    if (material.isResource) {
+      final Resource resource = _dataController.resourceCache[material.material]!;
+      icon = resource.icon;
+      iconBlob = resource.iconBlob;
+    } else {
+      final Product product = _dataController.productCache[material.material]!;
+      icon = product.icon;
+      iconBlob = product.iconBlob;
+    }
+    return TableRow(children: [Row(children: [
+      IconButton(
+        onPressed: () => _amoutOnTap(index),
+        icon: loadIcon(icon, iconBlob),
+        style: ButtonStyle(overlayColor: MaterialStateProperty.all(Colors.transparent)),
+      ),
+      Expanded(child: TextButton(
+        onPressed: () => _amoutOnTap(index),
+        style: ButtonStyle(
+          padding: MaterialStateProperty.all(EdgeInsets.zero),
+          alignment: Alignment.centerLeft,
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+          overlayColor: MaterialStateProperty.all(Colors.transparent),
+        ),
+        child: Text(material.material, style: const TextStyle(fontWeight: FontWeight.normal)),
+      )),
+      TextButton(
+        onPressed: () => _amoutOnTap(index),
+        style: ButtonStyle(
+          alignment: Alignment.center,
+          foregroundColor: MaterialStateProperty.all(Colors.white),
+          overlayColor: MaterialStateProperty.all(Colors.transparent),
+        ),
+        child: Text(_numberFormat.format(material.amount), style: const TextStyle(fontWeight: FontWeight.normal)),
+      ),
+      IconButton(
+        onPressed: () => _removeItemOnTap(index),
+        icon: const Icon(Icons.delete, color: Colors.red)
+      )
+    ])]);
   }
 
   void _addMaterialOnTap() async {
@@ -200,6 +280,65 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
+  void _enableOnChange(bool? value) {
+    widget.product.enable = value ?? false;
+    _dataController.saveProduct().then((value) => setState(() {}));
+  }
+
+  void _regionFactoryOnChange(bool? value) {
+    widget.product.isRegionFactoryAvailabe = value ?? false;
+    _dataController.saveProduct().then((value) => setState(() {}));
+  }
+
+  void _mineableOnChange(bool? value) {
+    widget.product.mineable = value ?? false;
+    _dataController.saveProduct().then((value) => setState(() {}));
+  }
+
+  void _productionAmoutOnTap() {
+    inputNumberDialogBuilder(
+      context,
+      "Amount of '${widget.product.name}' per each production",
+      "${widget.product.amount}",
+      (value) {
+        widget.product.amount = int.parse(value);
+        _dataController.saveProduct().then((value) => setState(() {}));
+      }
+    );
+  }
+
+  void _productionDurationOnTap() {
+    List<PickerItem> hours = [];
+    for (int index = 0; index < 3; index += 1) {
+      hours.add(PickerItem(text: Text("${index}h")));
+    }
+    List<PickerItem> minutes = [];
+    for (int index = 0; index < 59; index += 1) {
+      minutes.add(PickerItem(text: Text("${index}m")));
+    }
+    List<PickerItem> seconds = [];
+    for (int index = 0; index < 59; index += 1) {
+      seconds.add(PickerItem(text: Text("${index}s")));
+    }
+    final Picker picker = Picker(
+      title: const Text("Production duration"),
+      backgroundColor: Colors.black,
+      adapter: PickerDataAdapter(
+        isArray: true,
+        data: [
+        PickerItem(children: hours),
+        PickerItem(children: minutes),
+        PickerItem(children: seconds),
+      ]),
+      onConfirm: (_, selected) {
+        widget.product.produceTime = DurationComponents.fromList(selected).duration;
+        _dataController.saveProduct().then((value) => setState(() {}));
+      },
+    );
+    picker.selecteds = DurationComponents.init(widget.product.produceTime ?? 0).toList;
+    picker.showModal(context);
+  }
+
 }
 
 class _ProductPageDataController {
@@ -207,12 +346,12 @@ class _ProductPageDataController {
   List<ProductMaterial> materials = [];
   Map<String, Resource> resourceCache = {};
   Map<String, Product> productCache = {};
-  String _productName = "";
+  Product? _product;
 
-  Future<void> loadData(String productName) async {
-    _productName = productName;
+  Future<void> loadData(Product product) async {
+    _product = product;
     MaterialDatabase db = MaterialDatabase();
-    materials = await db.loadMaterialsForProducts([productName]);
+    materials = await db.loadMaterialsForProducts([product.name]);
     List<String> resourceNames = [];
     List<String> productNames = [];
     for (ProductMaterial material in materials) {
@@ -240,7 +379,7 @@ class _ProductPageDataController {
   }
 
   Future<void> buildExcludedList(List<String> resourceNames, List<String> productNames) async {
-    productNames.add(_productName);
+    productNames.add(_product?.name ?? "");
     for (ProductMaterial material in materials) {
       if (material.isResource) {
         resourceNames.add(material.material);
@@ -248,7 +387,7 @@ class _ProductPageDataController {
         productNames.add(material.material);
       }
     }
-    List<ProductMaterial> dependencies = await MaterialDatabase().loadMaterialsForResources([_productName], null);
+    List<ProductMaterial> dependencies = await MaterialDatabase().loadMaterialsForResources([_product?.name ?? ""], null);
     for (ProductMaterial material in dependencies) {
       if (!material.isResource && !productNames.contains(material.product)) {
         productNames.add(material.product);
@@ -259,7 +398,7 @@ class _ProductPageDataController {
   Future<void> addNewMaterial(String name, bool isResource) async {
     final MaterialDatabase db = MaterialDatabase();
     final ProductMaterial newMaterial = ProductMaterial(
-      product: _productName,
+      product: _product?.name ?? "",
       material: name,
       amount: 0,
       isResource: isResource
@@ -289,6 +428,10 @@ class _ProductPageDataController {
   Future<void> removeMaterial(int index) async {
     await MaterialDatabase().delteMaterial(materials[index]);
     materials.removeAt(index);
+  }
+
+  Future<void> saveProduct() async {
+    await MaterialDatabase().updateProduct(_product!);
   }
 
 }
