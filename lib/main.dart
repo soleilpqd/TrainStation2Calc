@@ -133,6 +133,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
       _foldedSections.contains(_HomePageSection.input) ? 0 : _dataController.items[_HomePageSection.input.rawValue].length,
       _foldedSections.contains(_HomePageSection.inventory) ? 0 : _dataController.items[_HomePageSection.inventory.rawValue].length,
       _dataController.items[_HomePageSection.result.rawValue].length,
+      0
     ];
     final int numOfRows = TableIndex.getNumberOrRows(lengths);
     if (!MaterialDatabase().isOpen) {
@@ -183,20 +184,24 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
             columnWidths: const <int, TableColumnWidth>{
               0: FixedColumnWidth(80),
               1: FlexColumnWidth(),
-              2: FixedColumnWidth(90),
+              2: FixedColumnWidth(100),
               3: FixedColumnWidth(40),
             },
             children: List<TableRow>.generate(numOfRows, (index) {
               final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
-              _HomePageSection section = _HomePageSection.init(tableIndex.section);
-              if (tableIndex.row == null) {
-                return _makeSectionHeader(section);
+              try {
+                _HomePageSection section = _HomePageSection.init(tableIndex.section);
+                if (tableIndex.row == null) {
+                  return _makeSectionHeader(section);
+                }
+                return _makeRow(section, tableIndex.row!);
+              } catch (error) {
+                return TableRow(children: screenBottoms(4));
               }
-              return _makeRow(section, tableIndex.row!);
             }),
           ),
         ],
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      )
     );
   }
 
@@ -232,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
         ),
         Text(
           "Quantity",
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: section.rawValue < _HomePageSection.result.rawValue ? Colors.black : Colors.white
           )
@@ -273,7 +278,21 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
           ),
           child: Text(item.material),
         ),
-        Text(_numberFormat.format(item.amount), textAlign: TextAlign.right),
+        Row(children: [
+          Text(_numberFormat.format(item.amount), textAlign: TextAlign.right),
+          SizedBox(width: 30, child: IconButton(
+            onPressed: () => _setAmount(section, index, true),
+            icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
+            iconSize: 24,
+            padding: EdgeInsets.zero
+          )),
+          SizedBox(width: 30, child: IconButton(
+            onPressed: () => _setAmount(section, index, false),
+            icon: Icon(Icons.remove_circle, color: Theme.of(context).colorScheme.primary),
+            iconSize: 24,
+            padding: EdgeInsets.zero
+          ))
+        ]),
         section.rawValue < _HomePageSection.result.rawValue ?
           IconButton(
             onPressed: () => _removeItem(section, index),
@@ -302,18 +321,18 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
         completion: (Resource? resource, Product? product) {
           if (resource != null) {
             _dataController.addResource(resource, section);
-            _setAmount(section, _dataController.items[section.rawValue].length - 1);
+            _setAmount(section, _dataController.items[section.rawValue].length - 1, null);
           }
           if (product != null) {
             _dataController.addProduct(product, section);
-            _setAmount(section, _dataController.items[section.rawValue].length - 1);
+            _setAmount(section, _dataController.items[section.rawValue].length - 1, null);
           }
         })
     );
   }
 
   void _itemOnSelection(_HomePageSection section, int index) {
-    _setAmount(section, index);
+    _setAmount(section, index, null);
   }
 
   void _removeItem(_HomePageSection section, int index) {
@@ -351,15 +370,22 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     });
   }
 
-  void _setAmount(_HomePageSection section, int index) {
+  void _setAmount(_HomePageSection section, int index, bool? isAdd) {
     ProductionJob item = _dataController.items[section.rawValue][index];
     String title = "";
-    if (section == _HomePageSection.input) {
-      title = "Input quantity for '${item.material}'";
+    String amount = "";
+    if (isAdd != null) {
+      title = isAdd ? "Increase" : "Decrease";
     } else {
-      title = "Inventory quantity for '${item.material}'";
+      title = "Set";
+      amount = "${item.amount}";
     }
-    String amount = "${item.amount}";
+    if (section == _HomePageSection.input) {
+      title += " input quantity for '${item.material}'";
+    } else {
+      title += " inventory quantity for '${item.material}'";
+    }
+    // TODO:
     ProductionJob? inventoryJob;
     if (section == _HomePageSection.result) {
       for (ProductionJob job in _dataController.items[_HomePageSection.inventory.rawValue]) {

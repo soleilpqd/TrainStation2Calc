@@ -85,7 +85,10 @@ class _DataSelectionPageState extends State<DataSelectionPage> {
                 0: FixedColumnWidth(80),
                 1: FlexColumnWidth()
               },
-              children: List<TableRow>.generate(_items.length, (index) {
+              children: List<TableRow>.generate(_items.length + 1, (index) {
+                if (index >= _items.length) {
+                  return TableRow(children: screenBottoms(2));
+                }
                 String item = _items[index];
                 String name = DataHistory.nameFromHistoryItem(item);
                 String? icon;

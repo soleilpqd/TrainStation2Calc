@@ -16,6 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 
@@ -29,6 +30,15 @@ Image loadIcon(String? name, Uint8List? blob) {
     return Image.asset("assets/icons/$name", width: 50, height: 50, errorBuilder: (context, error, stackTrace) => _defaultIcon);
   }
   return _defaultIcon;
+}
+
+SizedBox screenBottom() => SizedBox(height: (Platform.isAndroid || Platform.isIOS) ? 44 : 0);
+List<Widget> screenBottoms(int count) {
+  List<Widget> result = [screenBottom()];
+  while (result.length < count) {
+    result.add(Container());
+  }
+  return result;
 }
 
 class DurationComponents {

@@ -66,7 +66,8 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
   Widget build(BuildContext wgBuildCtx) {
     final List<int> lengths = [
       _dataController.resources.length,
-      _dataController.products.length
+      _dataController.products.length,
+      0
     ];
     final int numOfRows = TableIndex.getNumberOrRows(lengths);
     return Scaffold(
@@ -124,6 +125,9 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
   }
 
   TableRow _makeSectionRow(int section) {
+    if (section == 2) {
+      return TableRow(children: screenBottoms(4));
+    }
     return TableRow(
       decoration: const BoxDecoration(color: Colors.white),
       children: [

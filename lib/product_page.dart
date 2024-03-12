@@ -73,7 +73,7 @@ class _ProductPageState extends State<ProductPage> {
       firstSectionRows.add(_FirstSectionRow.quantity);
       firstSectionRows.add(_FirstSectionRow.duration);
     }
-    List<int> lengths = [firstSectionRows.length, _dataController.materials.length];
+    List<int> lengths = [firstSectionRows.length, _dataController.materials.length, 0];
     final int numOfRows = TableIndex.getNumberOrRows(lengths);
     return Scaffold(
       appBar: AppBar(
@@ -112,6 +112,9 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   TableRow _makeSectionHeader(int section) {
+    if (section == 2) {
+      return TableRow(children: screenBottoms(1));
+    }
     List<Widget> content = [];
     if (section == 0) {
       content = [
