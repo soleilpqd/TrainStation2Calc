@@ -65,7 +65,9 @@ class MyHomePage extends StatefulWidget {
 enum _HomePageSection {
   input(rawValue: 0),
   inventory(rawValue: 1),
-  result(rawValue: 2);
+  result(rawValue: 2),
+  summary(rawValue: 3),
+  bottomSpace(rawValue: 4);
 
   final int rawValue;
 
@@ -129,10 +131,11 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
 
   @override
   Widget build(BuildContext wgBuildCtx) {
-    final List<int> lengths = [
+    List<int> lengths = [
       _foldedSections.contains(_HomePageSection.input) ? 0 : _dataController.items[_HomePageSection.input.rawValue].length,
       _foldedSections.contains(_HomePageSection.inventory) ? 0 : _dataController.items[_HomePageSection.inventory.rawValue].length,
       _dataController.items[_HomePageSection.result.rawValue].length,
+      _dataController.items[_HomePageSection.result.rawValue].isNotEmpty ? 4 : 0,
       0
     ];
     final int numOfRows = TableIndex.getNumberOrRows(lengths);
@@ -189,15 +192,20 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
             },
             children: List<TableRow>.generate(numOfRows, (index) {
               final TableIndex tableIndex = TableIndex(index: index, sectionLengths: lengths);
-              try {
-                _HomePageSection section = _HomePageSection.init(tableIndex.section);
-                if (tableIndex.row == null) {
-                  return _makeSectionHeader(section);
-                }
-                return _makeRow(section, tableIndex.row!);
-              } catch (error) {
+              _HomePageSection section = _HomePageSection.init(tableIndex.section);
+              if (section == _HomePageSection.bottomSpace) {
                 return TableRow(children: screenBottoms(4));
               }
+              if (section == _HomePageSection.summary && _dataController.items[_HomePageSection.result.rawValue].isEmpty) {
+                return TableRow(children: [Container(), Container(), Container(), Container()]);
+              }
+              if (tableIndex.row == null) {
+                return _makeSectionHeader(section);
+              }
+              if (section == _HomePageSection.summary) {
+                return _makeSummaryRow(tableIndex.row!);
+              }
+              return _makeRow(section, tableIndex.row!);
             }),
           ),
         ],
@@ -209,18 +217,17 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     final List<String> titles = [
       "INPUT",
       "INVENTORY",
-      "RESULT"
+      "RESULT",
+      "SUMMARY"
     ];
     final bool isFolded = _foldedSections.contains(section);
-    if (section == _HomePageSection.result && _dataController.productionTime > 0) {
-      titles[section.rawValue] = "RESULT (${DurationComponents.init(_dataController.productionTime).formatedString})";
-    }
+    final bool isNormalSection = section.rawValue < _HomePageSection.result.rawValue;
     return TableRow(
-      decoration: BoxDecoration(color: section.rawValue < _HomePageSection.result.rawValue ? Colors.white : Theme.of(context).colorScheme.primary),
+      decoration: BoxDecoration(color: isNormalSection ? Colors.white : Theme.of(context).colorScheme.primary),
       children: [
         SizedBox(
           height: 48,
-          child: section.rawValue < _HomePageSection.result.rawValue ?
+          child: isNormalSection ?
             IconButton(
               iconSize: 32,
               icon: Icon(isFolded ? Icons.arrow_right : Icons.arrow_drop_down, color: Theme.of(context).colorScheme.primary),
@@ -232,19 +239,21 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
           titles[section.rawValue],
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: section.rawValue < _HomePageSection.result.rawValue ? Colors.black : Colors.white
+            color: isNormalSection ? Colors.black : Colors.white
           )
         ),
-        Text(
-          "Quantity",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: section.rawValue < _HomePageSection.result.rawValue ? Colors.black : Colors.white
-          )
-        ),
-        section.rawValue < _HomePageSection.result.rawValue ?
+        section != _HomePageSection.summary ?
+          Text(
+            "Quantity",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isNormalSection ? Colors.black : Colors.white
+            )
+          ) :
+          Container(),
+        isNormalSection ?
           IconButton(onPressed: () => _addItem(section), icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary), iconSize: 32) :
-          const Text("Prod", textAlign: TextAlign.center),
+          (section != _HomePageSection.summary ? const Text("Prod", textAlign: TextAlign.center) : Container()),
       ]
     );
   }
@@ -278,21 +287,24 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
           ),
           child: Text(item.material),
         ),
-        Row(children: [
-          Text(_numberFormat.format(item.amount), textAlign: TextAlign.right),
-          SizedBox(width: 30, child: IconButton(
-            onPressed: () => _setAmount(section, index, true),
-            icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
-            iconSize: 24,
-            padding: EdgeInsets.zero
-          )),
-          SizedBox(width: 30, child: IconButton(
-            onPressed: () => _setAmount(section, index, false),
-            icon: Icon(Icons.remove_circle, color: Theme.of(context).colorScheme.primary),
-            iconSize: 24,
-            padding: EdgeInsets.zero
-          ))
-        ]),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(_numberFormat.format(item.amount), textAlign: TextAlign.right),
+            SizedBox(width: 30, child: IconButton(
+              onPressed: () => _setAmount(section, index, true),
+              icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
+              iconSize: 24,
+              padding: EdgeInsets.zero
+            )),
+            SizedBox(width: 30, child: IconButton(
+              onPressed: () => _setAmount(section, index, false),
+              icon: Icon(Icons.remove_circle, color: Theme.of(context).colorScheme.primary),
+              iconSize: 24,
+              padding: EdgeInsets.zero
+            ))
+          ]
+        ),
         section.rawValue < _HomePageSection.result.rawValue ?
           IconButton(
             onPressed: () => _removeItem(section, index),
@@ -301,6 +313,33 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
           Text(prodCount, textAlign: TextAlign.center)
       ]
     );
+  }
+
+  TableRow _makeSummaryRow(int index) {
+    String title = "";
+    String value = "";
+    switch (index) {
+      case 0:
+        title = "Production duration";
+        value = DurationComponents.init(_dataController.productionTime).formatedString;
+      case 1:
+        title = "Minerals quantity [2]";
+        value = _numberFormat.format(_dataController.resResourceAmount);
+      case 2:
+        title = "Products quantity [3]";
+        value = _numberFormat.format(_dataController.resProductAmount);
+      case 3:
+        title = "Total quantity ([2] + [3])";
+        value = _numberFormat.format(_dataController.resResourceAmount + _dataController.resProductAmount);
+      default:
+        break;
+    }
+    return TableRow(children: [
+      const SizedBox(height: 32),
+      Text(title, textAlign: TextAlign.left),
+      Text(value, textAlign: TextAlign.right),
+      Container()
+    ]);
   }
 
   void _addItem(_HomePageSection section) {
@@ -385,13 +424,12 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
     } else {
       title += " inventory quantity for '${item.material}'";
     }
-    // TODO:
     ProductionJob? inventoryJob;
     if (section == _HomePageSection.result) {
       for (ProductionJob job in _dataController.items[_HomePageSection.inventory.rawValue]) {
         if (job.material == item.material && job.isResource == item.isResource) {
           inventoryJob = job;
-          amount = "${job.amount}";
+          if (isAdd == null) amount = "${job.amount}";
           break;
         }
       }
@@ -413,9 +451,29 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
             }
             inventoryJob = _dataController.items[_HomePageSection.inventory.rawValue][_dataController.items[_HomePageSection.inventory.rawValue].length - 1];
           }
-          inventoryJob?.amount = res;
+          if (isAdd != null) {
+            if (isAdd) {
+              inventoryJob?.amount += res;
+            } else {
+              res = (inventoryJob?.amount ?? 0) - res;
+              if (res < 0) res = 0;
+              inventoryJob?.amount = res;
+            }
+          } else {
+            inventoryJob?.amount = res;
+          }
         } else {
-          item.amount = res;
+          if (isAdd != null) {
+            if (isAdd) {
+              item.amount += res;
+            } else {
+              res = item.amount - res;
+              if (res < 0) res = 0;
+              item.amount = res;
+            }
+          } else {
+            item.amount = res;
+          }
         }
         _dataController.save();
         _calculate();
@@ -441,6 +499,8 @@ class _MyHomePageDataController {
   final Map<String, Product> _cacheProducts = {};
   final DataHistory _history = DataHistory();
   int productionTime = 0;
+  int resResourceAmount = 0;
+  int resProductAmount = 0;
 
   void cacheResource(Resource resource) => _cacheResources[resource.name] = resource;
   void cacheProduct(Product product) => _cacheProducts[product.name] = product;
@@ -625,11 +685,15 @@ class _MyHomePageDataController {
     }
     target.addAll(temp2);
     productionTime = 0;
+    resResourceAmount = 0;
+    resProductAmount = 0;
     for (ProductionJob job in target) {
       if (job.isResource) {
         _history.addItemSecondary("${DataHistory.resourcePrefix}${job.material}");
+        resResourceAmount += job.amount;
       } else {
         _history.addItemSecondary("${DataHistory.productPrefix}${job.material}");
+        resProductAmount += job.amount;
         Product product = getProduct(job.material)!;
         if (!product.mineable && product.produceTime != null) {
           productionTime += (job.amount ~/ product.amount) * product.produceTime!;
