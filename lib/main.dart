@@ -29,7 +29,6 @@ import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/help_page.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-// import 'package:url_launcher/url_launcher_string.dart';
 
 void main() {
   sqfliteFfiInit();

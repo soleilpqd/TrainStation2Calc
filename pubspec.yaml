@@ -41,7 +41,7 @@ dependencies:
   image_picker: 1.0.7
   sqflite_common_ffi: any
   # webview_flutter: any
-  # url_launcher: any
+  url_launcher: any
   flutter_markdown: any
   shared_preferences: any
   flutter_picker: any

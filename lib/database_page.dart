@@ -26,6 +26,8 @@ import 'package:train_station_2_calc/models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'package:train_station_2_calc/product_page.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class DatabasePage extends StatefulWidget {
   const DatabasePage({super.key});
@@ -392,6 +394,18 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
               completion(null);
             },
             child: const Text("Default", style: TextStyle(color: Colors.red))
+          ),
+          const SizedBox(height: 16, width: 300),
+          TextButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+              backgroundColor: MaterialStateProperty.all(Colors.white)
+            ),
+            onPressed: () {
+              Navigator.of(dlgCtx).pop();
+              launchUrlString(Uri.encodeFull("https://www.google.com/search?q=${title}&udm=2&tbs=isz:i"));
+            },
+            child: const Text("Google it!")
           ),
           const SizedBox(height: 16, width: 300),
           TextButton(
