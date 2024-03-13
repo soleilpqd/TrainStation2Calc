@@ -26,7 +26,7 @@ import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/database_page.dart';
 import 'package:train_station_2_calc/data_selection_page.dart';
 import 'package:train_station_2_calc/dialogs.dart';
-import 'package:train_station_2_calc/markdown_page.dart';
+import 'package:train_station_2_calc/help_page.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 // import 'package:url_launcher/url_launcher_string.dart';
@@ -433,6 +433,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
           break;
         }
       }
+      if ((isAdd ?? false) || amount.isEmpty) amount = "${item.amount}";
     }
     inputNumberDialogBuilder(
       context,
@@ -486,7 +487,7 @@ class _MyHomePageState extends State<MyHomePage> with RouteAware {
   }
 
   void _helpOnTap() {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const MarkdownPage()));
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpPage()));
   }
 
 }

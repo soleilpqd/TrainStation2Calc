@@ -321,6 +321,7 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
     _addNewItem("Input product name", name: name, (text) async {
       if (await _dataController.addNewProduct(text)) {
         setState(() {});
+        _productRowOnSelection(0);
       } else if (text.isNotEmpty) {
         showRetry(
           // ignore: use_build_context_synchronously

@@ -322,7 +322,7 @@
         },
         {
             "name": "sofa",
-            "produceTime": 3600,
+            "produceTime": 6300,
             "icon": "Icon_Sofa.png",
             "level": 192,
             "amount": 240,
