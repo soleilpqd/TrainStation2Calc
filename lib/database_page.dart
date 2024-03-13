@@ -26,7 +26,6 @@ import 'package:train_station_2_calc/models.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 import 'package:train_station_2_calc/product_page.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class DatabasePage extends StatefulWidget {
