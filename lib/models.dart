@@ -19,15 +19,16 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
+import 'package:train_station_2_calc/anti_confuse.dart';
 
-final Image _defaultIcon = Image.asset("assets/icons/Icon_404.png", width: 50, height: 50);
+final UiImage _defaultIcon = UiImage.asset("assets/icons/Icon_404.png", width: 50, height: 50);
 
-Image loadIcon(String? name, Uint8List? blob) {
+UiImage loadIcon(String? name, Uint8List? blob) {
   if (blob != null) {
-    return Image.memory(blob, width: 50, height: 50);
+    return UiImage.memory(blob, width: 50, height: 50);
   }
   if (name != null && name.isNotEmpty) {
-    return Image.asset("assets/icons/$name", width: 50, height: 50, errorBuilder: (context, error, stackTrace) => _defaultIcon);
+    return UiImage.asset("assets/icons/$name", width: 50, height: 50, errorBuilder: (context, error, stackTrace) => _defaultIcon);
   }
   return _defaultIcon;
 }

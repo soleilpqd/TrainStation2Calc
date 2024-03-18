@@ -45,6 +45,7 @@ dependencies:
   flutter_markdown: any
   shared_preferences: any
   flutter_picker: any
+  vector_math: any
 
 dev_dependencies:
   # flutter_test:

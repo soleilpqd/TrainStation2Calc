@@ -21,10 +21,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/dialogs.dart';
+import 'package:train_station_2_calc/image_crop_page.dart';
 import 'package:train_station_2_calc/main.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as img;
+import 'package:train_station_2_calc/anti_confuse.dart';
+import 'package:image/image.dart';
 import 'package:train_station_2_calc/product_page.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -344,26 +346,26 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
   }
 
   void _iconResourceOnTap(int index) {
-    _showIconSettings(_dataController.resources[index].name, (image) {
+    _showIconSettings(_dataController.resources[index].name, (ImgImage? image) {
       Uint8List? blob;
       if (image != null) {
-        blob = img.encodeJpg(image);
+        blob = encodeJpg(image);
       }
       _dataController.updateResourceIcon(index, blob).then((value) => setState(() {}));
     });
   }
 
   void _iconProductOnTap(int index) {
-    _showIconSettings(_dataController.products[index].name, (image) {
+    _showIconSettings(_dataController.products[index].name, (ImgImage?image) {
       Uint8List? blob;
       if (image != null) {
-        blob = img.encodeJpg(image);
+        blob = encodeJpg(image);
       }
       _dataController.updateProductIcon(index, blob).then((value) => setState(() {}));
     });
   }
 
-  void _showIconSettings(String title, Function(img.Image?) completion) {
+  void _showIconSettings(String title, Function(ImgImage?) completion) {
     showModalBottomSheet(
       context: context,
       builder: (dlgCtx) => Wrap(children: [Column(
@@ -423,7 +425,7 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
     );
   }
 
-  void _pickImage(Function(img.Image?) completion) async {
+  void _pickImage(Function(ImgImage?) completion) async {
     final ImagePicker picker = ImagePicker();
     try {
       XFile? file = await picker.pickImage(source: ImageSource.gallery, maxHeight: 50.0);
@@ -431,12 +433,13 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
         // ignore: use_build_context_synchronously
         showLoading(context);
         Uint8List data = await file.readAsBytes();
-        final cmd = img.Command()
-          ..decodeImage(data)
-          ..copyResize(height: 50);
-        await cmd.executeThread();
-        completion(cmd.outputImage);
+        ImgImage? image = decodeImage(data);
         closeLoading();
+        if (image != null) {
+          _cropImage(image, completion);
+        } else {
+          completion(null);
+        }
       }
     } on Exception {
       closeLoading();
@@ -448,6 +451,30 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
         () => _pickImage(completion)
       );
     }
+  }
+
+  void _cropImage(ImgImage image, Function(ImgImage?) completion) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ImageCropPage(
+      image: image,
+      onCompletion:(rect) {
+        showLoading(context);
+        if (rect != null) {
+          ImgImage cropImage = copyCrop(
+            image,
+            x: rect.left.toInt(),
+            y: rect.top.toInt(),
+            width: rect.width.toInt(),
+            height: rect.height.toInt()
+          );
+          ImgImage resizeImage = copyResize(cropImage, height: 50);
+          completion(resizeImage);
+        } else {
+          ImgImage resizeImage = copyResize(image, height: 50);
+          completion(resizeImage);
+        }
+        closeLoading();
+      }
+    )));
   }
 
   void _filterTextOnChange(String value) {

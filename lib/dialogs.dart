@@ -72,6 +72,7 @@ void closeLoading() {
     _loadingContext = null;
   }
 }
+
 void showRetry(BuildContext context, String title, String message, Function() retry) {
   showDialog(context: context, builder: ((dlgCtx) {
     return AlertDialog(
