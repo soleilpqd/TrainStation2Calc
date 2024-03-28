@@ -16,12 +16,20 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:typed_data';
+
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pasteboard/pasteboard.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:train_station_2_calc/crop_view.dart';
 import 'package:train_station_2_calc/database.dart';
 import 'package:train_station_2_calc/dialogs.dart';
 import 'package:train_station_2_calc/image_crop_page.dart';
+import 'package:train_station_2_calc/isolations.dart';
 import 'package:train_station_2_calc/main.dart';
 import 'package:train_station_2_calc/models.dart';
 import 'package:image_picker/image_picker.dart';
@@ -349,29 +357,65 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
     _showIconSettings(_dataController.resources[index].name, (ImgImage? image) {
       Uint8List? blob;
       if (image != null) {
-        blob = encodeJpg(image);
+        blob = encodePng(image);
       }
       _dataController.updateResourceIcon(index, blob).then((value) => setState(() {}));
     });
   }
 
   void _iconProductOnTap(int index) {
-    _showIconSettings(_dataController.products[index].name, (ImgImage?image) {
-      Uint8List? blob;
-      if (image != null) {
-        blob = encodeJpg(image);
-      }
-      _dataController.updateProductIcon(index, blob).then((value) => setState(() {}));
+    _showIconSettings(_dataController.products[index].name, (ImgImage? image) {
+      showLoading(context);
+      compute((image) {
+        Uint8List? blob;
+        if (image != null) {
+          blob = encodePng(image);
+        }
+        return blob;
+      }, image).then((blob) async {
+        await _dataController.updateProductIcon(index, blob);
+      }).then((value) {
+        setState(() {});
+        closeLoading();
+      });
     });
   }
 
-  void _showIconSettings(String title, Function(ImgImage?) completion) {
-    showModalBottomSheet(
-      context: context,
-      builder: (dlgCtx) => Wrap(children: [Column(
-        children: [
-          const SizedBox(height: 16, width: 300),
-          Text("Icon setting for \"$title\"", style: const TextStyle(fontWeight: FontWeight.bold)),
+  List<Widget> _buildIconSettingsButtons(BuildContext dlgCtx, String title, Function(ImgImage?) completion) {
+    List<Widget> buttons = [
+      const SizedBox(height: 16, width: 300),
+      Text("Icon setting for \"$title\"", style: const TextStyle(fontWeight: FontWeight.bold)),
+      const SizedBox(height: 16, width: 300)
+    ];
+    if (!Platform.isAndroid) {
+      buttons.addAll([
+        TextButton(
+          style: ButtonStyle(
+            minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+            backgroundColor: MaterialStateProperty.all(Colors.white)
+          ),
+          onPressed: () async {
+            Navigator.of(dlgCtx).pop();
+            _pickPasteboard(completion);
+          },
+          child: const Text("Pasteboard")
+        )
+      ]);
+    }
+    if (isPhone()) {
+      buttons.addAll([
+        const SizedBox(height: 16, width: 300),
+          TextButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+              backgroundColor: MaterialStateProperty.all(Colors.white)
+            ),
+            onPressed: () async {
+              Navigator.of(dlgCtx).pop();
+              _pickImage(true, completion);
+            },
+            child: const Text("Camera")
+          ),
           const SizedBox(height: 16, width: 300),
           TextButton(
             style: ButtonStyle(
@@ -380,99 +424,192 @@ class _DatabasePageState extends State<DatabasePage> with RouteAware {
             ),
             onPressed: () async {
               Navigator.of(dlgCtx).pop();
-              _pickImage(completion);
+              _pickImage(false, completion);
             },
-            child: const Text("Pick from file")
-          ),
-          const SizedBox(height: 16, width: 300),
-          TextButton(
-            style: ButtonStyle(
-              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
-              backgroundColor: MaterialStateProperty.all(Colors.white)
-            ),
-            onPressed: () {
-              Navigator.of(dlgCtx).pop();
-              completion(null);
-            },
-            child: const Text("Default", style: TextStyle(color: Colors.red))
-          ),
-          const SizedBox(height: 16, width: 300),
-          TextButton(
-            style: ButtonStyle(
-              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
-              backgroundColor: MaterialStateProperty.all(Colors.white)
-            ),
-            onPressed: () {
-              Navigator.of(dlgCtx).pop();
-              launchUrlString(Uri.encodeFull("https://www.google.com/search?q=${title}&udm=2&tbs=isz:i"));
-            },
-            child: const Text("Google it!")
-          ),
-          const SizedBox(height: 16, width: 300),
-          TextButton(
-            style: ButtonStyle(
-              minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
-              backgroundColor: MaterialStateProperty.all(Colors.white)
-            ),
-            onPressed: () {
-              Navigator.of(dlgCtx).pop();
-            },
-            child: const Text("Cancel")
-          ),
-          const SizedBox(height: 50, width: 300)
-        ]
+            child: const Text("Library")
+          )
+      ]);
+    }
+    buttons.addAll([
+      const SizedBox(height: 16, width: 300),
+      TextButton(
+        style: ButtonStyle(
+          minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+          backgroundColor: MaterialStateProperty.all(Colors.white)
+        ),
+        onPressed: () async {
+          Navigator.of(dlgCtx).pop();
+          _pickFile(completion);
+        },
+        child: const Text("File")
+      ),
+      const SizedBox(height: 16, width: 300),
+      TextButton(
+        style: ButtonStyle(
+          minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+          backgroundColor: MaterialStateProperty.all(Colors.white)
+        ),
+        onPressed: () {
+          Navigator.of(dlgCtx).pop();
+          completion(null);
+        },
+        child: const Text("Default", style: TextStyle(color: Colors.red))
+      ),
+      const SizedBox(height: 16, width: 300),
+      TextButton(
+        style: ButtonStyle(
+          minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+          backgroundColor: MaterialStateProperty.all(Colors.white)
+        ),
+        onPressed: () {
+          Navigator.of(dlgCtx).pop();
+          launchUrlString(Uri.encodeFull("https://www.google.com/search?q=${title}&udm=2&tbs=isz:i"));
+        },
+        child: const Text("Google it!")
+      ),
+      const SizedBox(height: 16, width: 300),
+      TextButton(
+        style: ButtonStyle(
+          minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
+          backgroundColor: MaterialStateProperty.all(Colors.white)
+        ),
+        onPressed: () {
+          Navigator.of(dlgCtx).pop();
+        },
+        child: const Text("Cancel")
+      ),
+      const SizedBox(height: 50, width: 300)
+    ]);
+    return buttons;
+  }
+
+  void _showIconSettings(String title, Function(ImgImage?) completion) {
+    showModalBottomSheet(
+      context: context,
+      builder: (dlgCtx) => Wrap(children: [Column(
+        children: _buildIconSettingsButtons(dlgCtx, title, completion)
       )])
     );
   }
 
-  void _pickImage(Function(ImgImage?) completion) async {
-    final ImagePicker picker = ImagePicker();
-    try {
-      XFile? file = await picker.pickImage(source: ImageSource.gallery, maxHeight: 50.0);
-      if (file != null && context.mounted) {
-        // ignore: use_build_context_synchronously
+  void _pasteboardFailed() {
+    showDialog(
+      context: context,
+      builder: (dlgContext) => AlertDialog(
+        title: const Text("Error"),
+        content: const Text("Pasteboard is empty or does not contain image."),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(dlgContext).pop();
+            }
+          )
+        ]
+      )
+    );
+  }
+
+  void _pickPasteboard(Function(ImgImage?) completion) async {
+    if (!isPhone()) {
+      List<String> files = await Pasteboard.files();
+      if (files.isNotEmpty) {
+        File file = File(files.first);
         showLoading(context);
-        Uint8List data = await file.readAsBytes();
-        ImgImage? image = decodeImage(data);
-        closeLoading();
-        if (image != null) {
-          _cropImage(image, completion);
-        } else {
-          completion(null);
+        Isolations.loadImageFromFile(file).then((value) {
+          closeLoading();
+          if (value != null) {
+            _cropImage(value, completion);
+          } else {
+            _pasteboardFailed();
+          }
+        });
+      } else {
+        _pasteboardFailed();
+      }
+    } else {
+      Uint8List? data = await Pasteboard.image;
+      if (data != null) {
+        showLoading(context);
+        Isolations.loadImageFromData(data).then((value) {
+          closeLoading();
+          if (value != null) {
+            _cropImage(value, completion);
+          } else {
+            _pasteboardFailed();
+          }
+        });
+      } else {
+        _pasteboardFailed();
+      }
+    }
+  }
+
+  void _pickFile(Function(ImgImage?) completion) async {
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo info = await DeviceInfoPlugin().androidInfo;
+      if ((info.version.sdkInt ?? 0) <= 32) {
+        if ((await Permission.storage.isDenied) && !(await Permission.storage.request()).isGranted) {
+          return;
+        }
+      } else {
+        bool isDenied = await Permission.photos.isDenied;
+        if (isDenied) {
+          if (!(await Permission.photos.request()).isGranted) {
+            return;
+          }
         }
       }
-    } on Exception {
-      closeLoading();
+    }
+    FilePickerResult? result = await FilePicker.platform.pickFiles(type: isPhone() ? FileType.any : FileType.image, withData: true);
+    Uint8List? data = result?.files.first.bytes;
+    if (data != null) {
+      showLoading(context);
+      Isolations.loadImageFromData(data).then((value) {
+        closeLoading();
+        if (value != null) {
+          _cropImage(value, completion);
+        }
+      });
+    }
+  }
+
+  void _pickImage(bool isCamera, Function(ImgImage?) completion) async {
+    final ImagePicker picker = ImagePicker();
+    XFile? file;
+    try {
+      file = await picker.pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
+    } catch (error) {
       showRetry(
         // ignore: use_build_context_synchronously
         context,
         "Something wrong",
         "Fail to load given image. Please select a differenct one.",
-        () => _pickImage(completion)
+        () => _pickImage(isCamera, completion)
       );
+      return;
+    }
+    if (file != null && context.mounted) {
+      // ignore: use_build_context_synchronously
+      showLoading(context);
+      Isolations.loadImageFromXFile(file).then((value) {
+        closeLoading();
+        if (value != null) {
+          _cropImage(value, completion);
+        }
+      });
     }
   }
 
   void _cropImage(ImgImage image, Function(ImgImage?) completion) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => ImageCropPage(
       image: image,
-      onCompletion:(rect) {
+      onCompletion:(angle, rect) {
         showLoading(context);
-        if (rect != null) {
-          ImgImage cropImage = copyCrop(
-            image,
-            x: rect.left.toInt(),
-            y: rect.top.toInt(),
-            width: rect.width.toInt(),
-            height: rect.height.toInt()
-          );
-          ImgImage resizeImage = copyResize(cropImage, height: 50);
-          completion(resizeImage);
-        } else {
-          ImgImage resizeImage = copyResize(image, height: 50);
-          completion(resizeImage);
-        }
-        closeLoading();
+        Isolations.cropResizeImage(image, angle, rect).then((value) {
+          closeLoading();
+          completion(value);
+        });
       }
     )));
   }

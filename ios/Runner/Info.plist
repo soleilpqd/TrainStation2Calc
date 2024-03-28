@@ -49,5 +49,7 @@
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose icon</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos</string>
 </dict>
 </plist>

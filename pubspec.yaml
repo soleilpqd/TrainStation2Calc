@@ -39,13 +39,17 @@ dependencies:
   intl: ^0.19.0
   image: 4.1.7
   image_picker: 1.0.7
-  sqflite_common_ffi: any
+  file_picker: 8.0.0
+  sqflite_common_ffi: 2.3.3
   # webview_flutter: any
-  url_launcher: any
-  flutter_markdown: any
-  shared_preferences: any
-  flutter_picker: any
-  vector_math: any
+  url_launcher: 6.2.5
+  flutter_markdown: 0.6.22
+  shared_preferences: 2.2.2
+  flutter_picker: 2.1.0
+  vector_math: 2.1.4
+  pasteboard: 0.2.0
+  permission_handler: 11.3.1
+  device_info_plus: 10.0.1
 
 dev_dependencies:
   # flutter_test:
